@@ -1,0 +1,15 @@
+name: voicevox_core
+description: A Dart library for accessing common Voicevox Core APIs using, FFI.
+version: 0.1.0
+homepage: https://github.com/sansuido/voicevox_core
+repository: https://github.com/sansuido/voicevox_core
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  ffi: ^2.1.4
+
+dev_dependencies:
+  change_case: ^2.2.0
+  halildurmus_lints: ^1.0.1
