@@ -8,7 +8,7 @@ import 'package:voicevox_core/voicevox_core.dart';
 
 const gOpenJtalkDicPath = 'assets/open_jtalk_dic_utf_8-1.11';
 const gModelFilePath = 'assets/model/0.vvm';
-const gText = 'こんにちは、ヴォイスボックスのダートバインディングを使っています。';
+const gText = 'こんにちは、ヴォイスヴォックスのダートバインディングを使っています。';
 const gStyleId = 0;
 const gOutputWavFilePath = 'output.wav';
 

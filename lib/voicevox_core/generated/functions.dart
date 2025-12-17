@@ -395,6 +395,146 @@ int voicevoxAudioQueryCreateFromAccentPhrases(
 }
 
 ///
+/// JSONを`AudioQuery`型としてバリデートする。
+///
+/// 次のうちどれかを満たすならエラーを返す。
+///
+/// - [Rust APIの`AudioQuery`型]としてデシリアライズ不可、もしくはJSONとして不正。
+/// - `accent_phrases`の要素のうちいずれかが、 ::voicevox_accent_phrase_validate でエラーになる。
+/// - `outputSamplingRate`が`24000`の倍数ではない、もしくは`0` (将来的に解消予定。cf. [#762])。
+///
+/// [Rust APIの`AudioQuery`型]: ../rust_api/voicevox_core/struct.AudioQuery.html
+/// [#762]: https://github.com/VOICEVOX/voicevox_core/issues/762
+///
+/// 次の状態に対しては警告のログを出す。将来的にはエラーになる予定。
+///
+/// - `accent_phrases`の要素のうちいずれかが警告が出る状態。
+/// - `speedScale`が負。
+/// - `volumeScale`が負。
+/// - `prePhonemeLength`が負。
+/// - `postPhonemeLength`が負。
+/// - `outputSamplingRate`が`24000`以外の値（エラーと同様将来的に解消予定）。
+///
+/// @param [in] audio_query_json `AudioQuery`型のJSON
+///
+/// @returns 成功時には ::VOICEVOX_RESULT_OK 、失敗時には ::VOICEVOX_RESULT_INVALID_AUDIO_QUERY_ERROR
+///
+/// \safety{
+/// - `audio_query_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_audio_query_validate}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_audio_query_validate(const char *audio_query_json)
+/// ```
+int voicevoxAudioQueryValidate(String? audioQueryJson) {
+  final voicevoxAudioQueryValidateLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(Pointer<Utf8>),
+        int Function(Pointer<Utf8>)
+      >('voicevox_audio_query_validate');
+
+  final audioQueryJsonPointer = audioQueryJson != null
+      ? audioQueryJson.toNativeUtf8()
+      : nullptr;
+  final result = voicevoxAudioQueryValidateLookupFunction(
+    audioQueryJsonPointer,
+  );
+  calloc.free(audioQueryJsonPointer);
+  return result;
+}
+
+///
+/// JSONを`AccentPhrase`型としてバリデートする。
+///
+/// 次のうちどれかを満たすならエラーを返す。
+///
+/// - [Rust APIの`AccentPhrase`型]としてデシリアライズ不可、もしくはJSONとして不正。
+/// - `moras`もしくは`pause_mora`の要素のうちいずれかが、 ::voicevox_mora_validate でエラーになる。
+/// - `accent`が`0`。
+///
+/// [Rust APIの`AccentPhrase`型]: ../rust_api/voicevox_core/struct.AccentPhrase.html
+///
+/// 次の状態に対しては警告のログを出す。将来的にはエラーになる予定。
+///
+/// - `moras`もしくは`pause_mora`の要素のうちいずれかが、警告が出る状態。
+/// - `accent`が`moras`の数を超過している。
+///
+/// @param [in] accent_phrase_json `AccentPhrase`型のJSON
+///
+/// @returns 成功時には ::VOICEVOX_RESULT_OK 、失敗時には ::VOICEVOX_RESULT_INVALID_ACCENT_PHRASE_ERROR
+///
+/// \safety{
+/// - `accent_phrase_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_accent_phrase_validate}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_accent_phrase_validate(const char *accent_phrase_json)
+/// ```
+int voicevoxAccentPhraseValidate(String? accentPhraseJson) {
+  final voicevoxAccentPhraseValidateLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(Pointer<Utf8>),
+        int Function(Pointer<Utf8>)
+      >('voicevox_accent_phrase_validate');
+
+  final accentPhraseJsonPointer = accentPhraseJson != null
+      ? accentPhraseJson.toNativeUtf8()
+      : nullptr;
+  final result = voicevoxAccentPhraseValidateLookupFunction(
+    accentPhraseJsonPointer,
+  );
+  calloc.free(accentPhraseJsonPointer);
+  return result;
+}
+
+///
+/// JSONを`Mora`型としてバリデートする。
+///
+/// 次のうちどれかを満たすならエラーを返す。
+///
+/// - [Rust APIの`Mora`型]としてデシリアライズ不可、もしくはJSONとして不正。
+/// - `consonant`と`consonant_length`の有無が不一致。
+/// - `consonant`が子音以外の音素であるか、もしくは音素として不正。
+/// - `vowel`が子音であるか、もしくは音素として不正。
+///
+/// [Rust APIの`Mora`型]: ../rust_api/voicevox_core/struct.Mora.html
+///
+/// 次の状態に対しては警告のログを出す。将来的にはエラーになる予定。
+///
+/// - `consonant_length`が負。
+/// - `vowel_length`が負。
+///
+/// @param [in] mora_json `Mora`型のJSON
+///
+/// @returns 成功時には ::VOICEVOX_RESULT_OK 、失敗時には ::VOICEVOX_RESULT_INVALID_MORA_ERROR
+///
+/// \safety{
+/// - `mora_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_mora_validate}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_mora_validate(const char *mora_json)
+/// ```
+int voicevoxMoraValidate(String? moraJson) {
+  final voicevoxMoraValidateLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(Pointer<Utf8>),
+        int Function(Pointer<Utf8>)
+      >('voicevox_mora_validate');
+
+  final moraJsonPointer = moraJson != null ? moraJson.toNativeUtf8() : nullptr;
+  final result = voicevoxMoraValidateLookupFunction(moraJsonPointer);
+  calloc.free(moraJsonPointer);
+  return result;
+}
+
+///
 /// VVMファイルを開く。
 ///
 /// @param [in] path vvmファイルへのUTF-8のファイルパス
