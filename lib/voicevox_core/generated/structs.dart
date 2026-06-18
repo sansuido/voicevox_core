@@ -13,19 +13,19 @@ final class VoicevoxInitializeOptions extends Struct {
 }
 
 final class VoicevoxSynthesisOptions extends Struct {
-  @Uint8()
-  external int enableInterrogativeUpspeak;
+  @Bool()
+  external bool enableInterrogativeUpspeak;
 }
 
 final class VoicevoxTtsOptions extends Struct {
-  @Uint8()
-  external int enableInterrogativeUpspeak;
+  @Bool()
+  external bool enableInterrogativeUpspeak;
 }
 
 final class VoicevoxUserDictWord extends Struct {
   external Pointer<Utf8> surface;
   external Pointer<Utf8> pronunciation;
-  @Uint64()
+  @UintPtr()
   external int accentType;
   @Int32()
   external int wordType;

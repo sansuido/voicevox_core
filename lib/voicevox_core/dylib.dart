@@ -9,8 +9,10 @@ class VoicevoxCoreDynamicLibraryService {
       var header = '';
       var extension = '';
       switch (Platform.operatingSystem) {
-        case 'android':
         case 'linux':
+          header = '';
+          extension = '.so.0';
+        case 'android':
         case 'fuchsia':
           header = '';
           extension = '.so';

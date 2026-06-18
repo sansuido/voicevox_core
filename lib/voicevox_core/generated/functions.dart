@@ -395,9 +395,9 @@ int voicevoxAudioQueryCreateFromAccentPhrases(
 }
 
 ///
-/// JSONを`AudioQuery`型としてバリデートする。
+/// 与えられたJSONが`AudioQuery`型として不正であるときエラーを返す。
 ///
-/// 次のうちどれかを満たすならエラーを返す。
+/// 不正であるとは、以下のいずれかの条件を満たすことである。
 ///
 /// - [Rust APIの`AudioQuery`型]としてデシリアライズ不可、もしくはJSONとして不正。
 /// - `accent_phrases`の要素のうちいずれかが、 ::voicevox_accent_phrase_validate でエラーになる。
@@ -446,9 +446,9 @@ int voicevoxAudioQueryValidate(String? audioQueryJson) {
 }
 
 ///
-/// JSONを`AccentPhrase`型としてバリデートする。
+/// 与えられたJSONが`AccentPhrase`型として不正であるときエラーを返す。
 ///
-/// 次のうちどれかを満たすならエラーを返す。
+/// 不正であるとは、以下のいずれかの条件を満たすことである。
 ///
 /// - [Rust APIの`AccentPhrase`型]としてデシリアライズ不可、もしくはJSONとして不正。
 /// - `moras`もしくは`pause_mora`の要素のうちいずれかが、 ::voicevox_mora_validate でエラーになる。
@@ -492,9 +492,9 @@ int voicevoxAccentPhraseValidate(String? accentPhraseJson) {
 }
 
 ///
-/// JSONを`Mora`型としてバリデートする。
+/// 与えられたJSONが`Mora`型として不正であるときエラーを返す。
 ///
-/// 次のうちどれかを満たすならエラーを返す。
+/// 不正であるとは、以下のいずれかの条件を満たすことである。
 ///
 /// - [Rust APIの`Mora`型]としてデシリアライズ不可、もしくはJSONとして不正。
 /// - `consonant`と`consonant_length`の有無が不一致。
@@ -531,6 +531,209 @@ int voicevoxMoraValidate(String? moraJson) {
   final moraJsonPointer = moraJson != null ? moraJson.toNativeUtf8() : nullptr;
   final result = voicevoxMoraValidateLookupFunction(moraJsonPointer);
   calloc.free(moraJsonPointer);
+  return result;
+}
+
+///
+/// 与えられたJSONが`Score`型として不正であるときエラーを返す。
+///
+/// 不正であるとは、以下のいずれかの条件を満たすことである。
+///
+/// - [Rust APIの`Score`型]としてデシリアライズ不可、もしくはJSONとして不正。
+/// - `notes`の要素のうちいずれかが、 ::voicevox_note_validate でエラーになる。
+/// - `notes`が空であるか、もしくは先頭が音符。
+///
+/// [Rust APIの`Score`型]: ../rust_api/voicevox_core/struct.Score.html
+///
+/// @param [in] score_json `Score`型のJSON
+///
+/// @returns 成功時には ::VOICEVOX_RESULT_OK 、失敗時には ::VOICEVOX_RESULT_INVALID_SCORE_ERROR
+///
+/// \safety{
+/// - `score_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_score_validate}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_score_validate(const char *score_json)
+/// ```
+int voicevoxScoreValidate(String? scoreJson) {
+  final voicevoxScoreValidateLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(Pointer<Utf8>),
+        int Function(Pointer<Utf8>)
+      >('voicevox_score_validate');
+
+  final scoreJsonPointer = scoreJson != null
+      ? scoreJson.toNativeUtf8()
+      : nullptr;
+  final result = voicevoxScoreValidateLookupFunction(scoreJsonPointer);
+  calloc.free(scoreJsonPointer);
+  return result;
+}
+
+///
+/// 与えられたJSONが`Note`型として不正であるときエラーを返す。
+///
+/// 不正であるとは、以下のいずれかの条件を満たすことである。
+///
+/// - [Rust APIの`Note`型]としてデシリアライズ不可、もしくはJSONとして不正。
+/// - `key`が`null`かつ`lyric`が`""`以外。
+/// - `key`が非`null`かつ`lyric`が`""`。
+///
+/// [Rust APIの`Note`型]: ../rust_api/voicevox_core/struct.Note.html
+///
+/// @param [in] note_json `Note`型のJSON
+///
+/// @returns 成功時には ::VOICEVOX_RESULT_OK 、失敗時には ::VOICEVOX_RESULT_INVALID_NOTE_ERROR
+///
+/// \safety{
+/// - `note_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_note_validate}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_note_validate(const char *note_json)
+/// ```
+int voicevoxNoteValidate(String? noteJson) {
+  final voicevoxNoteValidateLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(Pointer<Utf8>),
+        int Function(Pointer<Utf8>)
+      >('voicevox_note_validate');
+
+  final noteJsonPointer = noteJson != null ? noteJson.toNativeUtf8() : nullptr;
+  final result = voicevoxNoteValidateLookupFunction(noteJsonPointer);
+  calloc.free(noteJsonPointer);
+  return result;
+}
+
+///
+/// 与えられたJSONが`FrameAudioQuery`型として不正であるときエラーを返す。
+///
+/// 不正であるとは、以下の条件を満たすことである。
+///
+/// - [Rust APIの`FrameAudioQuery`型]としてデシリアライズ不可、もしくはJSONとして不正。
+///
+/// [Rust APIの`FrameAudioQuery`型]: ../rust_api/voicevox_core/struct.FrameAudioQuery.html
+///
+/// 次の状態に対しては警告のログを出す。将来的にはエラーになる予定。
+///
+/// - `outputSamplingRate`が`24000`以外の値（将来的に解消予定）。
+///
+/// @param [in] frame_audio_query_json `FrameAudioQuery`型のJSON
+///
+/// @returns 成功時には ::VOICEVOX_RESULT_OK 、失敗時には ::VOICEVOX_RESULT_INVALID_FRAME_AUDIO_QUERY_ERROR
+///
+/// \safety{
+/// - `frame_audio_query_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_frame_audio_query_validate}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_frame_audio_query_validate(const char *frame_audio_query_json)
+/// ```
+int voicevoxFrameAudioQueryValidate(String? frameAudioQueryJson) {
+  final voicevoxFrameAudioQueryValidateLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(Pointer<Utf8>),
+        int Function(Pointer<Utf8>)
+      >('voicevox_frame_audio_query_validate');
+
+  final frameAudioQueryJsonPointer = frameAudioQueryJson != null
+      ? frameAudioQueryJson.toNativeUtf8()
+      : nullptr;
+  final result = voicevoxFrameAudioQueryValidateLookupFunction(
+    frameAudioQueryJsonPointer,
+  );
+  calloc.free(frameAudioQueryJsonPointer);
+  return result;
+}
+
+///
+/// 与えられたJSONが`FramePhoneme`型として不正であるときエラーを返す。
+///
+/// 不正であるとは、以下の条件を満たすことである。
+///
+/// - [Rust APIの`FramePhoneme`型]としてデシリアライズ不可、もしくはJSONとして不正。
+///
+/// [Rust APIの`FramePhoneme`型]: ../rust_api/voicevox_core/struct.FramePhoneme.html
+///
+/// @param [in] frame_phoneme_json `FramePhoneme`型のJSON
+///
+/// @returns 成功時には ::VOICEVOX_RESULT_OK 、失敗時には ::VOICEVOX_RESULT_INVALID_FRAME_PHONEME_ERROR
+///
+/// \safety{
+/// - `frame_phoneme_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \no-orig-impl{voicevox_frame_phoneme_validate}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_frame_phoneme_validate(const char *frame_phoneme_json)
+/// ```
+int voicevoxFramePhonemeValidate(String? framePhonemeJson) {
+  final voicevoxFramePhonemeValidateLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(Pointer<Utf8>),
+        int Function(Pointer<Utf8>)
+      >('voicevox_frame_phoneme_validate');
+
+  final framePhonemeJsonPointer = framePhonemeJson != null
+      ? framePhonemeJson.toNativeUtf8()
+      : nullptr;
+  final result = voicevoxFramePhonemeValidateLookupFunction(
+    framePhonemeJsonPointer,
+  );
+  calloc.free(framePhonemeJsonPointer);
+  return result;
+}
+
+///
+/// 与えられた楽譜と歌唱合成用のクエリの組み合わせが、基本周波数と音量の生成に利用できるかどうかを確認する。
+///
+/// 次のうちどれかを満たすならエラーを返す。
+///
+/// - `score_json`が ::voicevox_score_validate でエラーになる。
+/// - `frame_audio_query_json`が ::voicevox_frame_audio_query_validate でエラーになる。
+/// - `notes`が表す音素ID列と、`phonemes`が表す音素ID列が等しくない。ただし異なる音素の表現が同一のIDを表すことがある。
+///
+/// @param [in] score_json `Score`型のJSON
+/// @param [in] frame_audio_query_json `FrameAudioQuery`型のJSON
+///
+/// @returns 成功時には ::VOICEVOX_RESULT_OK 、失敗時には ::VOICEVOX_RESULT_INVALID_SCORE_ERROR, ::VOICEVOX_RESULT_INVALID_FRAME_AUDIO_QUERY_ERROR, ::VOICEVOX_RESULT_INCOMPATIBLE_QUERIES_ERROR
+///
+/// \safety{
+/// - `score_json`と`frame_audio_query_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+/// \orig-impl{voicevox_ensure_compatible}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_ensure_compatible(const char *score_json, const char *frame_audio_query_json)
+/// ```
+int voicevoxEnsureCompatible(String? scoreJson, String? frameAudioQueryJson) {
+  final voicevoxEnsureCompatibleLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(Pointer<Utf8>, Pointer<Utf8>),
+        int Function(Pointer<Utf8>, Pointer<Utf8>)
+      >('voicevox_ensure_compatible');
+
+  final scoreJsonPointer = scoreJson != null
+      ? scoreJson.toNativeUtf8()
+      : nullptr;
+  final frameAudioQueryJsonPointer = frameAudioQueryJson != null
+      ? frameAudioQueryJson.toNativeUtf8()
+      : nullptr;
+  final result = voicevoxEnsureCompatibleLookupFunction(
+    scoreJsonPointer,
+    frameAudioQueryJsonPointer,
+  );
+  calloc
+    ..free(scoreJsonPointer)
+    ..free(frameAudioQueryJsonPointer);
   return result;
 }
 
@@ -827,11 +1030,11 @@ Pointer<VoicevoxOnnxruntime> voicevoxSynthesizerGetOnnxruntime(
 bool voicevoxSynthesizerIsGpuMode(Pointer<VoicevoxSynthesizer> synthesizer) {
   final voicevoxSynthesizerIsGpuModeLookupFunction = _libCore
       .lookupFunction<
-        Uint8 Function(Pointer<VoicevoxSynthesizer>),
-        int Function(Pointer<VoicevoxSynthesizer>)
+        Bool Function(Pointer<VoicevoxSynthesizer>),
+        bool Function(Pointer<VoicevoxSynthesizer>)
       >('voicevox_synthesizer_is_gpu_mode');
 
-  return voicevoxSynthesizerIsGpuModeLookupFunction(synthesizer) == 1;
+  return voicevoxSynthesizerIsGpuModeLookupFunction(synthesizer);
 }
 
 ///
@@ -857,15 +1060,14 @@ bool voicevoxSynthesizerIsLoadedVoiceModel(
 ) {
   final voicevoxSynthesizerIsLoadedVoiceModelLookupFunction = _libCore
       .lookupFunction<
-        Uint8 Function(Pointer<VoicevoxSynthesizer>, Pointer<Uint8>),
-        int Function(Pointer<VoicevoxSynthesizer>, Pointer<Uint8>)
+        Bool Function(Pointer<VoicevoxSynthesizer>, Pointer<Uint8>),
+        bool Function(Pointer<VoicevoxSynthesizer>, Pointer<Uint8>)
       >('voicevox_synthesizer_is_loaded_voice_model');
 
   return voicevoxSynthesizerIsLoadedVoiceModelLookupFunction(
-        synthesizer,
-        modelId,
-      ) ==
-      1;
+    synthesizer,
+    modelId,
+  );
 }
 
 ///
@@ -1431,7 +1633,7 @@ int voicevoxSynthesizerSynthesis(
   String? audioQueryJson,
   int styleId,
   VoicevoxSynthesisOptions options,
-  Pointer<Uint64> outputWavLength,
+  Pointer<UintPtr> outputWavLength,
   Pointer<Pointer<Uint8>> outputWav,
 ) {
   final voicevoxSynthesizerSynthesisLookupFunction = _libCore
@@ -1441,7 +1643,7 @@ int voicevoxSynthesizerSynthesis(
           Pointer<Utf8>,
           Uint32,
           VoicevoxSynthesisOptions,
-          Pointer<Uint64>,
+          Pointer<UintPtr>,
           Pointer<Pointer<Uint8>>,
         ),
         int Function(
@@ -1449,7 +1651,7 @@ int voicevoxSynthesizerSynthesis(
           Pointer<Utf8>,
           int,
           VoicevoxSynthesisOptions,
-          Pointer<Uint64>,
+          Pointer<UintPtr>,
           Pointer<Pointer<Uint8>>,
         )
       >('voicevox_synthesizer_synthesis');
@@ -1518,7 +1720,7 @@ int voicevoxSynthesizerTtsFromKana(
   String? kana,
   int styleId,
   VoicevoxTtsOptions options,
-  Pointer<Uint64> outputWavLength,
+  Pointer<UintPtr> outputWavLength,
   Pointer<Pointer<Uint8>> outputWav,
 ) {
   final voicevoxSynthesizerTtsFromKanaLookupFunction = _libCore
@@ -1528,7 +1730,7 @@ int voicevoxSynthesizerTtsFromKana(
           Pointer<Utf8>,
           Uint32,
           VoicevoxTtsOptions,
-          Pointer<Uint64>,
+          Pointer<UintPtr>,
           Pointer<Pointer<Uint8>>,
         ),
         int Function(
@@ -1536,7 +1738,7 @@ int voicevoxSynthesizerTtsFromKana(
           Pointer<Utf8>,
           int,
           VoicevoxTtsOptions,
-          Pointer<Uint64>,
+          Pointer<UintPtr>,
           Pointer<Pointer<Uint8>>,
         )
       >('voicevox_synthesizer_tts_from_kana');
@@ -1589,7 +1791,7 @@ int voicevoxSynthesizerTts(
   String? text,
   int styleId,
   VoicevoxTtsOptions options,
-  Pointer<Uint64> outputWavLength,
+  Pointer<UintPtr> outputWavLength,
   Pointer<Pointer<Uint8>> outputWav,
 ) {
   final voicevoxSynthesizerTtsLookupFunction = _libCore
@@ -1599,7 +1801,7 @@ int voicevoxSynthesizerTts(
           Pointer<Utf8>,
           Uint32,
           VoicevoxTtsOptions,
-          Pointer<Uint64>,
+          Pointer<UintPtr>,
           Pointer<Pointer<Uint8>>,
         ),
         int Function(
@@ -1607,7 +1809,7 @@ int voicevoxSynthesizerTts(
           Pointer<Utf8>,
           int,
           VoicevoxTtsOptions,
-          Pointer<Uint64>,
+          Pointer<UintPtr>,
           Pointer<Pointer<Uint8>>,
         )
       >('voicevox_synthesizer_tts');
@@ -1626,6 +1828,318 @@ int voicevoxSynthesizerTts(
 }
 
 ///
+/// 楽譜から歌唱音声合成用のクエリを作成する。
+///
+/// 詳細はユーザーガイド[歌唱音声合成]を参照。
+///
+/// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
+///
+/// 生成したJSONを解放するには ::voicevox_json_free を使う。
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] score_json [`Score`型]を表すJSON
+/// @param [in] style_id スタイルID
+/// @param [out] output_frame_audio_query_json 生成先
+///
+/// [`Score`型]: ../rust_api/voicevox_core/struct.Score.html
+///
+/// @returns 結果コード
+///
+/// \example{
+/// ```c
+/// const char *kScore =
+/// "{"
+/// "  \"notes\": [ "
+/// "    { \"key\": null, \"frame_length\": 15, \"lyric\": \"\" },"
+/// "    { \"key\": 60, \"frame_length\": 45, \"lyric\": \"ド\" },"
+/// "    { \"key\": 62, \"frame_length\": 45, \"lyric\": \"レ\" },"
+/// "    { \"key\": 64, \"frame_length\": 45, \"lyric\": \"ミ\" },"
+/// "    { \"key\": null, \"frame_length\": 15, \"lyric\": \"\" }"
+/// "  ]"
+/// "}";
+/// const VoicevoxStyleId kSingingTeacher = 6000;
+///
+/// char *frame_audio_query;
+/// const VoicevoxResultCode result =
+/// voicevox_synthesizer_create_sing_frame_audio_query(
+/// synthesizer, kScore, kSingingTeacher, &frame_audio_query);
+/// ```
+/// }
+///
+/// \safety{
+/// - `score_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `output_frame_audio_query_json`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_synthesizer_create_sing_frame_audio_query}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_create_sing_frame_audio_query(const struct VoicevoxSynthesizer *synthesizer, const char *score_json, VoicevoxStyleId style_id, char **output_frame_audio_query_json)
+/// ```
+int voicevoxSynthesizerCreateSingFrameAudioQuery(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  String? scoreJson,
+  int styleId,
+  Pointer<Pointer<Int8>> outputFrameAudioQueryJson,
+) {
+  final voicevoxSynthesizerCreateSingFrameAudioQueryLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(
+          Pointer<VoicevoxSynthesizer>,
+          Pointer<Utf8>,
+          Uint32,
+          Pointer<Pointer<Int8>>,
+        ),
+        int Function(
+          Pointer<VoicevoxSynthesizer>,
+          Pointer<Utf8>,
+          int,
+          Pointer<Pointer<Int8>>,
+        )
+      >('voicevox_synthesizer_create_sing_frame_audio_query');
+
+  final scoreJsonPointer = scoreJson != null
+      ? scoreJson.toNativeUtf8()
+      : nullptr;
+  final result = voicevoxSynthesizerCreateSingFrameAudioQueryLookupFunction(
+    synthesizer,
+    scoreJsonPointer,
+    styleId,
+    outputFrameAudioQueryJson,
+  );
+  calloc.free(scoreJsonPointer);
+  return result;
+}
+
+///
+/// 楽譜と歌唱音声合成用のクエリから、フレームごとの基本周波数を生成する。
+///
+/// 詳細はユーザーガイド[歌唱音声合成]を参照。
+///
+/// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
+///
+/// 生成したJSONを解放するには ::voicevox_json_free を使う。
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] score_json [`Score`型]を表すJSON
+/// @param [in] frame_audio_query_json [`FrameAudioQuery`型]を表すJSON
+/// @param [in] style_id スタイルID
+/// @param [out] output_f0_json 生成先
+///
+/// [`Score`型]: ../rust_api/voicevox_core/struct.Score.html
+/// [`FrameAudioQuery`型]: ../rust_api/voicevox_core/struct.FrameAudioQuery.html
+///
+/// @returns 結果コード
+///
+/// \safety{
+/// - `score_json`と`frame_audio_query_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `output_f0_json`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_synthesizer_create_sing_frame_f0}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_create_sing_frame_f0(const struct VoicevoxSynthesizer *synthesizer, const char *score_json, const char *frame_audio_query_json, VoicevoxStyleId style_id, char **output_f0_json)
+/// ```
+int voicevoxSynthesizerCreateSingFrameF0(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  String? scoreJson,
+  String? frameAudioQueryJson,
+  int styleId,
+  Pointer<Pointer<Int8>> outputF0Json,
+) {
+  final voicevoxSynthesizerCreateSingFrameF0LookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(
+          Pointer<VoicevoxSynthesizer>,
+          Pointer<Utf8>,
+          Pointer<Utf8>,
+          Uint32,
+          Pointer<Pointer<Int8>>,
+        ),
+        int Function(
+          Pointer<VoicevoxSynthesizer>,
+          Pointer<Utf8>,
+          Pointer<Utf8>,
+          int,
+          Pointer<Pointer<Int8>>,
+        )
+      >('voicevox_synthesizer_create_sing_frame_f0');
+
+  final scoreJsonPointer = scoreJson != null
+      ? scoreJson.toNativeUtf8()
+      : nullptr;
+  final frameAudioQueryJsonPointer = frameAudioQueryJson != null
+      ? frameAudioQueryJson.toNativeUtf8()
+      : nullptr;
+  final result = voicevoxSynthesizerCreateSingFrameF0LookupFunction(
+    synthesizer,
+    scoreJsonPointer,
+    frameAudioQueryJsonPointer,
+    styleId,
+    outputF0Json,
+  );
+  calloc
+    ..free(scoreJsonPointer)
+    ..free(frameAudioQueryJsonPointer);
+  return result;
+}
+
+///
+/// 楽譜と歌唱音声合成用のクエリから、フレームごとの音量を生成する。
+///
+/// 詳細はユーザーガイド[歌唱音声合成]を参照。
+///
+/// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
+///
+/// 生成したJSONを解放するには ::voicevox_json_free を使う。
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] score_json [`Score`型]を表すJSON
+/// @param [in] frame_audio_query_json [`FrameAudioQuery`型]を表すJSON
+/// @param [in] style_id スタイルID
+/// @param [out] output_volume_json 生成先
+///
+/// [`Score`型]: ../rust_api/voicevox_core/struct.Score.html
+/// [`FrameAudioQuery`型]: ../rust_api/voicevox_core/struct.FrameAudioQuery.html
+///
+/// @returns 結果コード
+///
+/// \safety{
+/// - `score_json`と`frame_audio_query_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `output_volume_json`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_synthesizer_create_sing_frame_volume}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_create_sing_frame_volume(const struct VoicevoxSynthesizer *synthesizer, const char *score_json, const char *frame_audio_query_json, VoicevoxStyleId style_id, char **output_volume_json)
+/// ```
+int voicevoxSynthesizerCreateSingFrameVolume(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  String? scoreJson,
+  String? frameAudioQueryJson,
+  int styleId,
+  Pointer<Pointer<Int8>> outputVolumeJson,
+) {
+  final voicevoxSynthesizerCreateSingFrameVolumeLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(
+          Pointer<VoicevoxSynthesizer>,
+          Pointer<Utf8>,
+          Pointer<Utf8>,
+          Uint32,
+          Pointer<Pointer<Int8>>,
+        ),
+        int Function(
+          Pointer<VoicevoxSynthesizer>,
+          Pointer<Utf8>,
+          Pointer<Utf8>,
+          int,
+          Pointer<Pointer<Int8>>,
+        )
+      >('voicevox_synthesizer_create_sing_frame_volume');
+
+  final scoreJsonPointer = scoreJson != null
+      ? scoreJson.toNativeUtf8()
+      : nullptr;
+  final frameAudioQueryJsonPointer = frameAudioQueryJson != null
+      ? frameAudioQueryJson.toNativeUtf8()
+      : nullptr;
+  final result = voicevoxSynthesizerCreateSingFrameVolumeLookupFunction(
+    synthesizer,
+    scoreJsonPointer,
+    frameAudioQueryJsonPointer,
+    styleId,
+    outputVolumeJson,
+  );
+  calloc
+    ..free(scoreJsonPointer)
+    ..free(frameAudioQueryJsonPointer);
+  return result;
+}
+
+///
+/// 歌唱音声合成を行う。
+///
+/// 詳細はユーザーガイド[歌唱音声合成]を参照。
+///
+/// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
+///
+/// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] frame_audio_query_json [`FrameAudioQuery`型]を表すJSON
+/// @param [in] style_id スタイルID
+/// @param [out] output_wav_length 出力のバイト長
+/// @param [out] output_wav 出力先
+///
+/// [`FrameAudioQuery`型]: ../rust_api/voicevox_core/struct.FrameAudioQuery.html
+///
+/// @returns 結果コード
+///
+/// \example{
+/// ```c
+/// const VoicevoxStyleId kSinger = 3000;
+///
+/// uint8_t *wav;
+/// size_t wav_length;
+/// const VoicevoxResultCode result = voicevox_synthesizer_frame_synthesis(
+/// synthesizer, frame_audio_query, kSinger, &wav_length, &wav);
+/// ```
+/// }
+///
+/// \safety{
+/// - `frame_audio_query_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `output_wav_length`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// - `output_wav`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_synthesizer_frame_synthesis}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_frame_synthesis(const struct VoicevoxSynthesizer *synthesizer, const char *frame_audio_query_json, VoicevoxStyleId style_id, uintptr_t *output_wav_length, uint8_t **output_wav)
+/// ```
+int voicevoxSynthesizerFrameSynthesis(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  String? frameAudioQueryJson,
+  int styleId,
+  Pointer<UintPtr> outputWavLength,
+  Pointer<Pointer<Uint8>> outputWav,
+) {
+  final voicevoxSynthesizerFrameSynthesisLookupFunction = _libCore
+      .lookupFunction<
+        Int32 Function(
+          Pointer<VoicevoxSynthesizer>,
+          Pointer<Utf8>,
+          Uint32,
+          Pointer<UintPtr>,
+          Pointer<Pointer<Uint8>>,
+        ),
+        int Function(
+          Pointer<VoicevoxSynthesizer>,
+          Pointer<Utf8>,
+          int,
+          Pointer<UintPtr>,
+          Pointer<Pointer<Uint8>>,
+        )
+      >('voicevox_synthesizer_frame_synthesis');
+
+  final frameAudioQueryJsonPointer = frameAudioQueryJson != null
+      ? frameAudioQueryJson.toNativeUtf8()
+      : nullptr;
+  final result = voicevoxSynthesizerFrameSynthesisLookupFunction(
+    synthesizer,
+    frameAudioQueryJsonPointer,
+    styleId,
+    outputWavLength,
+    outputWav,
+  );
+  calloc.free(frameAudioQueryJsonPointer);
+  return result;
+}
+
+///
 /// JSON文字列を解放する。
 ///
 /// @param [in] json 解放するJSON文字列。nullable
@@ -1638,10 +2152,15 @@ int voicevoxSynthesizerTts(
 /// - ::voicevox_open_jtalk_rc_analyze
 /// - ::voicevox_synthesizer_create_metas_json
 /// - ::voicevox_synthesizer_create_audio_query
+/// - ::voicevox_synthesizer_create_audio_query_from_kana
 /// - ::voicevox_synthesizer_create_accent_phrases
+/// - ::voicevox_synthesizer_create_accent_phrases_from_kana
 /// - ::voicevox_synthesizer_replace_mora_data
 /// - ::voicevox_synthesizer_replace_phoneme_length
 /// - ::voicevox_synthesizer_replace_mora_pitch
+/// - ::voicevox_synthesizer_create_sing_frame_audio_query
+/// - ::voicevox_synthesizer_create_sing_frame_f0
+/// - ::voicevox_synthesizer_create_sing_frame_volume
 /// - ::voicevox_user_dict_to_json
 /// - 文字列の長さは生成時より変更されていてはならない。
 /// - `json`がヌルポインタでないならば、<a href="#voicevox-core-safety">読み込みと書き込みについて有効</a>でなければならない。
@@ -1672,6 +2191,8 @@ void voicevoxJsonFree(Pointer<Int8> json) {
 /// - `wav`がヌルポインタでないならば、以下のAPIで得られたポインタでなくてはいけない。
 /// - ::voicevox_synthesizer_synthesis
 /// - ::voicevox_synthesizer_tts
+/// - ::voicevox_synthesizer_tts_from_kana
+/// - ::voicevox_synthesizer_frame_synthesis
 /// - `wav`がヌルポインタでないならば、<a href="#voicevox-core-safety">読み込みと書き込みについて有効</a>でなければならない。
 /// - `wav`がヌルポインタでないならば、以後<b>ダングリングポインタ</b>(_dangling pointer_)として扱われなくてはならない。
 /// }
@@ -1748,7 +2269,7 @@ VoicevoxUserDictWord voicevoxUserDictWordMake(
 ) {
   final voicevoxUserDictWordMakeLookupFunction = _libCore
       .lookupFunction<
-        VoicevoxUserDictWord Function(Pointer<Utf8>, Pointer<Utf8>, Uint64),
+        VoicevoxUserDictWord Function(Pointer<Utf8>, Pointer<Utf8>, UintPtr),
         VoicevoxUserDictWord Function(Pointer<Utf8>, Pointer<Utf8>, int)
       >('voicevox_user_dict_word_make');
 

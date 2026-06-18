@@ -1,61 +1,61 @@
 Voicevox Core for Dart
 ====
 
-このパッケージのメインページは以下なのだ。  
-
 https://pub.dev/packages/voicevox_core
 
 # Requirement
 
-このライブラリは、64bit専用で、ffiを利用しているのだ。  
+* ffi ^2.2.0
 
-* ffi ^2.1.4
-
-以下のようにインポートするのだ。  
+This library is limited to 64bit.  
 
 ```dart
 import 'package:voicevox_core/voicevox_core.dart';
 ```
 
-それぞれの環境で要求するライブラリは、以下の通りなのだ。  
-
-## Windows requires dll files.
+## Windows requires dll file.
 
 voicevox_core.dll  
+voicevox_onnxruntime.dll  
 
-## Linux (or Android, Fuchsia) requires so files.
+## Linux requires so.0 file.
+
+voicevox_core.so.0  
+voicevox_onnxruntime.so.0  
+
+## Android, Fuchsia requires so file.
 
 voicevox_core.so  
+voicevox_onnxruntime.so  
 
-## MacOS (or iOS) requires dylib files.
+## MacOS (or iOS) requires dylib file.
 
 voicevox_core.dylib  
+voicevox_onnxruntime.lib  
 
 ## And more.
 
-もし、自分でライブラリを指定したいなら、以下のように設定するのだ。  
+If you want to set a library under special circumstances (example: dylib), do the following:  
 
 ```dart
 VoicevoxCoreDynamicLibraryService().set('core', 'YOUR_core_ENVIONMENT.dylib');
 ```
 
+For the ONNX Runtime library, please follow the standard specifications and use `VoicevoxLoadOnnxruntimeOptions`.
+
 # Note
 
-Dartは以下からダウンロードするのだ。  
+Download Dart from here:
 
 https://www.libsdl.org/
 
-Voicevox Coreは以下からダウンロードするのだ。  
+Download VOICEVOX Core from here:
 
 https://github.com/VOICEVOX/voicevox_core
 
 
-
-
-ウィンドウズで動作確認をしているけど、他の環境でも動く気がするのだ。  
-動かなかったらごめんなさいなのだ。  
-
+This package has been tested and verified to work on Windows.
 
 # Author
 
-作者は、yamaharaなのだ。  
+yamahara  
