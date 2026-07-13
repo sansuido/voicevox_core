@@ -791,12 +791,12 @@ int voicevoxVoiceModelFileOpen(
 /// ```
 void voicevoxVoiceModelFileId(
   Pointer<VoicevoxVoiceModelFile> model,
-  Pointer<Pointer<Uint8>> outputVoiceModelId,
+  Pointer<Uint8> outputVoiceModelId,
 ) {
   final voicevoxVoiceModelFileIdLookupFunction = _libCore
       .lookupFunction<
-        Void Function(Pointer<VoicevoxVoiceModelFile>, Pointer<Pointer<Uint8>>),
-        void Function(Pointer<VoicevoxVoiceModelFile>, Pointer<Pointer<Uint8>>)
+        Void Function(Pointer<VoicevoxVoiceModelFile>, Pointer<Uint8>),
+        void Function(Pointer<VoicevoxVoiceModelFile>, Pointer<Uint8>)
       >('voicevox_voice_model_file_id');
 
   voicevoxVoiceModelFileIdLookupFunction(model, outputVoiceModelId);
@@ -2361,19 +2361,19 @@ int voicevoxUserDictLoad(Pointer<VoicevoxUserDict> userDict, String? dictPath) {
 int voicevoxUserDictAddWord(
   Pointer<VoicevoxUserDict> userDict,
   Pointer<VoicevoxUserDictWord> word,
-  Pointer<Pointer<Uint8>> outputWordUuid,
+  Pointer<Uint8> outputWordUuid,
 ) {
   final voicevoxUserDictAddWordLookupFunction = _libCore
       .lookupFunction<
         Int32 Function(
           Pointer<VoicevoxUserDict>,
           Pointer<VoicevoxUserDictWord>,
-          Pointer<Pointer<Uint8>>,
+          Pointer<Uint8>,
         ),
         int Function(
           Pointer<VoicevoxUserDict>,
           Pointer<VoicevoxUserDictWord>,
-          Pointer<Pointer<Uint8>>,
+          Pointer<Uint8>,
         )
       >('voicevox_user_dict_add_word');
 
@@ -2400,19 +2400,19 @@ int voicevoxUserDictAddWord(
 /// ```
 int voicevoxUserDictUpdateWord(
   Pointer<VoicevoxUserDict> userDict,
-  Pointer<Pointer<Uint8>> wordUuid,
+  Pointer<Uint8> wordUuid,
   Pointer<VoicevoxUserDictWord> word,
 ) {
   final voicevoxUserDictUpdateWordLookupFunction = _libCore
       .lookupFunction<
         Int32 Function(
           Pointer<VoicevoxUserDict>,
-          Pointer<Pointer<Uint8>>,
+          Pointer<Uint8>,
           Pointer<VoicevoxUserDictWord>,
         ),
         int Function(
           Pointer<VoicevoxUserDict>,
-          Pointer<Pointer<Uint8>>,
+          Pointer<Uint8>,
           Pointer<VoicevoxUserDictWord>,
         )
       >('voicevox_user_dict_update_word');
@@ -2438,12 +2438,12 @@ int voicevoxUserDictUpdateWord(
 /// ```
 int voicevoxUserDictRemoveWord(
   Pointer<VoicevoxUserDict> userDict,
-  Pointer<Pointer<Uint8>> wordUuid,
+  Pointer<Uint8> wordUuid,
 ) {
   final voicevoxUserDictRemoveWordLookupFunction = _libCore
       .lookupFunction<
-        Int32 Function(Pointer<VoicevoxUserDict>, Pointer<Pointer<Uint8>>),
-        int Function(Pointer<VoicevoxUserDict>, Pointer<Pointer<Uint8>>)
+        Int32 Function(Pointer<VoicevoxUserDict>, Pointer<Uint8>),
+        int Function(Pointer<VoicevoxUserDict>, Pointer<Uint8>)
       >('voicevox_user_dict_remove_word');
 
   return voicevoxUserDictRemoveWordLookupFunction(userDict, wordUuid);

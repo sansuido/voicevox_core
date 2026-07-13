@@ -1,3 +1,11 @@
+## 1.0.0
+
+- Added all glue functions.
+- Added `example/user_dict.dart`.
+- **[Breaking Change]** Changed `VoicevoxVoiceModelId` type from `Pointer<Uint8>` to `Uint8List` for safety and better memory management.
+- Updated environment/dependencies:
+  - sdk: '>=3.12.2 <4.0.0'
+
 ## 0.3.0
 
 - Supported `voicevox_core` v0.16.4.

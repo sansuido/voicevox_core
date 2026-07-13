@@ -29,6 +29,7 @@ class VoicevoxCoreDynamicLibraryService {
 
     entries = {};
     entries['core'] = getDefaultVoicevoxCoreFilename('voicevox_core');
+    // and 'onnxruntime' LOOK AT voicevoxxOnnxruntimeLoadOnce
   }
   late Map<String, String> entries;
 
@@ -36,6 +37,13 @@ class VoicevoxCoreDynamicLibraryService {
 
   void set(String key, String filename) {
     entries[key] = filename;
+  }
+
+  String? get(String key) {
+    if (entries.containsKey(key)) {
+      return entries[key];
+    }
+    return null;
   }
 
   DynamicLibrary open(String key) => DynamicLibrary.open(entries[key]!);

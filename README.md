@@ -39,15 +39,16 @@ If you want to set a library under special circumstances (example: dylib), do th
 
 ```dart
 VoicevoxCoreDynamicLibraryService().set('core', 'YOUR_core_ENVIONMENT.dylib');
+VoicevoxCoreDynamicLibraryService().set('onnxruntime', 'YOUR_onnxruntime_ENVIONMENT.dylib');
 ```
 
-For the ONNX Runtime library, please follow the standard specifications and use `VoicevoxLoadOnnxruntimeOptions`.
+The settings for the ONNX Runtime library are effective only when options are not used with `voicevoxxOnnxruntimeLoadOnce`.
 
 # Note
 
 Download Dart from here:
 
-https://www.libsdl.org/
+https://dart.dev/
 
 Download VOICEVOX Core from here:
 

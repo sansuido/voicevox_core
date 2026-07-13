@@ -3,6 +3,24 @@
 part of '../core.dart';
 
 ///
+/// デフォルトの ::voicevox_onnxruntime_load_once のオプションを生成する。
+///
+/// @return デフォルトの ::voicevox_onnxruntime_load_once のオプション
+///
+/// \availability{
+/// [リリース](https://github.com/voicevox/voicevox_core/releases)されているライブラリではiOSを除くプラットフォームで利用可能。詳細は<a href="#voicevox-core-availability">ファイルレベルの"Availability"の節</a>を参照。
+/// }
+///
+/// \no-orig-impl{voicevox_make_default_load_onnxruntime_options}
+///
+/// ```c
+/// __declspec(dllimport) struct VoicevoxLoadOnnxruntimeOptions voicevox_make_default_load_onnxruntime_options(void)
+/// ```
+VoicevoxxLoadOnnxruntimeOptions voicevoxxMakeDefaultLoadOnnxruntimeOptions() =>
+    VoicevoxxLoadOnnxruntimeOptions()
+      ..loadFromEntity(voicevoxMakeDefaultLoadOnnxruntimeOptions());
+
+///
 /// ONNX Runtimeをロードして初期化する。
 ///
 /// 一度成功したら、以後は引数を無視して同じ参照を返す。
@@ -27,14 +45,30 @@ part of '../core.dart';
 /// __declspec(dllimport) VoicevoxResultCode voicevox_onnxruntime_load_once(struct VoicevoxLoadOnnxruntimeOptions options, const struct VoicevoxOnnxruntime **out_onnxruntime)
 /// ```
 ({Pointer<VoicevoxOnnxruntime> onnxruntime, int result})
-voicevoxxOnnxruntimeLoadOnce(VoicevoxLoadOnnxruntimeOptions options) {
+voicevoxxOnnxruntimeLoadOnce({VoicevoxxLoadOnnxruntimeOptions? options}) {
+  var options0 = options;
+  if (options0 == null) {
+    final onnxruntimeFilename = dylib.VoicevoxCoreDynamicLibraryService().get(
+      'onnxruntime',
+    );
+    if (onnxruntimeFilename != null) {
+      options0 = voicevoxxMakeDefaultLoadOnnxruntimeOptions()
+        ..filename = onnxruntimeFilename;
+    }
+  }
+  options0 ??= voicevoxxMakeDefaultLoadOnnxruntimeOptions();
   Pointer<VoicevoxOnnxruntime> onnxruntime = nullptr;
+  final optionsPointer = options0.calloc();
   final onnxruntimePointer = calloc<Pointer<VoicevoxOnnxruntime>>();
-  final result = voicevoxOnnxruntimeLoadOnce(options, onnxruntimePointer);
+  final result = voicevoxOnnxruntimeLoadOnce(
+    optionsPointer.ref,
+    onnxruntimePointer,
+  );
   if (result == VOICEVOX_RESULT_OK) {
     onnxruntime = onnxruntimePointer.value;
   }
   calloc.free(onnxruntimePointer);
+  optionsPointer.callocAllFree();
   return (result: result, onnxruntime: onnxruntime);
 }
 
@@ -148,6 +182,19 @@ voicevoxxOnnxruntimeInitOnce() {
 }
 
 ///
+/// デフォルトの初期化オプションを生成する
+/// @return デフォルト値が設定された初期化オプション
+///
+/// \no-orig-impl{voicevox_make_default_initialize_options}
+///
+/// ```c
+/// __declspec(dllimport) struct VoicevoxInitializeOptions voicevox_make_default_initialize_options(void)
+/// ```
+VoicevoxxInitializeOptions voicevoxxMakeDefaultInitializeOptions() =>
+    VoicevoxxInitializeOptions()
+      ..loadFromEntity(voicevoxMakeDefaultInitializeOptions());
+
+///
 /// AccentPhraseの配列からAudioQueryを作る。
 ///
 /// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
@@ -226,15 +273,12 @@ voicevoxxVoiceModelFileOpen(String path) {
 /// ```c
 /// __declspec(dllimport) void voicevox_voice_model_file_id(const struct VoicevoxVoiceModelFile *model, uint8_t (*output_voice_model_id)[16])
 /// ```
-Pointer<Uint8> voicevoxxVoiceModelFileId(
-  Pointer<VoicevoxVoiceModelFile> model,
-) {
-  Pointer<Uint8> voiceModelId = nullptr;
-  final voideModelIdPointer = calloc<Pointer<Uint8>>();
-  voicevoxVoiceModelFileId(model, voideModelIdPointer);
-  voiceModelId = voideModelIdPointer.value;
-  calloc.free(voideModelIdPointer);
-  return voiceModelId;
+Uint8List voicevoxxVoiceModelFileId(Pointer<VoicevoxVoiceModelFile> model) {
+  final fileIdPointer = calloc<Uint8>(16);
+  voicevoxVoiceModelFileId(model, fileIdPointer);
+  final result = Uint8List.fromList(fileIdPointer.asTypedList(16));
+  calloc.free(fileIdPointer);
+  return result;
 }
 
 ///
@@ -283,22 +327,88 @@ String voicevoxxVoiceModelFileCreateMetasJson(
 ({int result, Pointer<VoicevoxSynthesizer> synthesizer})
 voicevoxxSynthesizerNew(
   Pointer<VoicevoxOnnxruntime> onnxruntime,
-  Pointer<OpenJtalkRc> openJtalk,
-  VoicevoxInitializeOptions options,
-) {
+  Pointer<OpenJtalkRc> openJtalk, {
+  VoicevoxxInitializeOptions? options,
+}) {
+  options ??= voicevoxxMakeDefaultInitializeOptions();
   Pointer<VoicevoxSynthesizer> synthesizer = nullptr;
+  final optionsPointer = options.calloc();
   final synthesizerPointer = calloc<Pointer<VoicevoxSynthesizer>>();
   final result = voicevoxSynthesizerNew(
     onnxruntime,
     openJtalk,
-    options,
+    optionsPointer.ref,
     synthesizerPointer,
   );
   if (result == VOICEVOX_RESULT_OK) {
     synthesizer = synthesizerPointer.value;
   }
-  calloc.free(synthesizerPointer);
+  calloc
+    ..free(optionsPointer)
+    ..free(synthesizerPointer);
   return (result: result, synthesizer: synthesizer);
+}
+
+///
+/// 音声モデルの読み込みを解除する。
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] model_id 音声モデルID
+///
+/// @returns 結果コード
+///
+/// \safety{
+/// - `model_id`は<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_synthesizer_unload_voice_model}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_unload_voice_model(const struct VoicevoxSynthesizer *synthesizer, VoicevoxVoiceModelId model_id)
+/// ```
+int voicevoxxSynthesizerUnloadVoiceModel(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  Uint8List modelId,
+) {
+  final modelIdPointer = ffi.calloc<Uint8>(16);
+  modelIdPointer.asTypedList(16).setAll(0, modelId);
+  final result = voicevoxSynthesizerUnloadVoiceModel(
+    synthesizer,
+    modelIdPointer,
+  );
+  calloc.free(modelIdPointer);
+  return result;
+}
+
+///
+/// 指定したIDの音声モデルが読み込まれているか判定する。
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] model_id 音声モデルID
+///
+/// @returns モデルが読み込まれているかどうか
+///
+/// \safety{
+/// - `model_id`は<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_synthesizer_is_loaded_voice_model}
+///
+/// ```c
+/// __declspec(dllimport) bool voicevox_synthesizer_is_loaded_voice_model(const struct VoicevoxSynthesizer *synthesizer, VoicevoxVoiceModelId model_id)
+/// ```
+bool voicevoxxSynthesizerIsLoadedVoiceModel(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  Uint8List modelId,
+) {
+  final modelIdPointer = ffi.calloc<Uint8>(16);
+  modelIdPointer.asTypedList(16).setAll(0, modelId);
+  final result = voicevoxSynthesizerIsLoadedVoiceModel(
+    synthesizer,
+    modelIdPointer,
+  );
+  calloc.free(modelIdPointer);
+  return result;
 }
 
 ///
@@ -322,6 +432,55 @@ String voicevoxxSynthesizerCreateMetasJson(
   final result = json.cast<Utf8>().toDartString();
   voicevoxJsonFree(json);
   return result;
+}
+
+///
+/// ONNX Runtimeとして利用可能なデバイスの情報を、JSONで取得する。
+///
+/// JSONの解放は ::voicevox_json_free で行う。
+///
+/// あくまでONNX Runtimeが対応しているデバイスの情報であることに注意。GPUが使える環境ではなかったとしても`cuda`や`dml`は`true`を示しうる。
+///
+/// @param [in] onnxruntime
+/// @param [out] output_supported_devices_json サポートデバイス情報のJSON文字列
+///
+/// @returns 結果コード
+///
+/// \example{
+/// ```c
+/// char *supported_devices;
+/// VoicevoxResultCode result = voicevox_onnxruntime_create_supported_devices_json(onnxruntime, &supported_devices);
+/// ```
+/// }
+///
+/// \safety{
+/// - `onnxruntime`は ::voicevox_onnxruntime_load_once または ::voicevox_onnxruntime_init_once で得たものでなければならない。
+/// - `output_supported_devices_json`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_onnxruntime_create_supported_devices_json}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_onnxruntime_create_supported_devices_json(const struct VoicevoxOnnxruntime *onnxruntime, char **output_supported_devices_json)
+/// ```
+({int result, String supportedDeficesJson})
+voicevoxxOnnxruntimeCreateSupportedDevicesJson(
+  Pointer<VoicevoxOnnxruntime> onnxruntime,
+) {
+  var supportedDeficesJson = '';
+  final supportedDevicesJsonPointer = calloc<Pointer<Int8>>();
+  final result = voicevoxOnnxruntimeCreateSupportedDevicesJson(
+    onnxruntime,
+    supportedDevicesJsonPointer,
+  );
+  if (result == VOICEVOX_RESULT_OK) {
+    supportedDeficesJson = supportedDevicesJsonPointer.value
+        .cast<Utf8>()
+        .toDartString();
+    voicevoxJsonFree(supportedDevicesJsonPointer.value);
+  }
+  calloc.free(supportedDevicesJsonPointer);
+  return (result: result, supportedDeficesJson: supportedDeficesJson);
 }
 
 ///
@@ -366,6 +525,63 @@ voicevoxxSynthesizerCreateAudioQueryFromKana(
   final result = voicevoxSynthesizerCreateAudioQueryFromKana(
     synthesizer,
     kana,
+    styleId,
+    autioQueryJsonPointer,
+  );
+  if (result == VOICEVOX_RESULT_OK) {
+    audioQueryJson = autioQueryJsonPointer.value.cast<Utf8>().toDartString();
+    voicevoxJsonFree(autioQueryJsonPointer.value);
+  }
+  calloc.free(autioQueryJsonPointer);
+  return (audioQueryJson: audioQueryJson, result: result);
+}
+
+///
+/// 日本語テキストから、AudioQueryをJSONとして生成する。
+///
+/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+///
+/// ::voicevox_synthesizer_create_accent_phrases と ::voicevox_audio_query_create_from_accent_phrases
+/// が一体になったショートハンド。詳細は[テキスト音声合成の流れ]を参照。
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] text UTF-8の日本語テキスト
+/// @param [in] style_id スタイルID
+/// @param [out] output_audio_query_json 生成先
+///
+/// @returns 結果コード
+///
+/// \example{
+/// ```c
+/// char *audio_query;
+/// voicevox_synthesizer_create_audio_query(synthesizer, "こんにちは",
+/// 2, // "四国めたん (ノーマル)"
+/// &audio_query);
+/// ```
+/// }
+///
+/// \safety{
+/// - `text`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `output_audio_query_json`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_synthesizer_create_audio_query}
+///
+/// [テキスト音声合成の流れ]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/tts-process.md
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_create_audio_query(const struct VoicevoxSynthesizer *synthesizer, const char *text, VoicevoxStyleId style_id, char **output_audio_query_json)
+/// ```
+({String audioQueryJson, int result}) voicevoxxSynthesizerCreateAudioQuery(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  String text,
+  int styleId,
+) {
+  var audioQueryJson = '';
+  final autioQueryJsonPointer = calloc<Pointer<Int8>>();
+  final result = voicevoxSynthesizerCreateAudioQuery(
+    synthesizer,
+    text,
     styleId,
     autioQueryJsonPointer,
   );
@@ -635,6 +851,90 @@ voicevoxxSynthesizerReplacePhonemeLength(
 }
 
 ///
+/// デフォルトの `voicevox_synthesizer_synthesis` のオプションを生成する
+/// @return デフォルト値が設定された `voicevox_synthesizer_synthesis` のオプション
+///
+/// \no-orig-impl{voicevox_make_default_synthesis_options}
+///
+/// ```c
+/// __declspec(dllimport) struct VoicevoxSynthesisOptions voicevox_make_default_synthesis_options(void)
+/// ```
+VoicevoxxSynthesisOptions voicevoxxMakeDefaultSynthesisOptions() =>
+    VoicevoxxSynthesisOptions()
+      ..loadFromEntity(voicevoxMakeDefaultSynthesisOptions());
+
+///
+/// AudioQueryから音声合成を行う。
+///
+/// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] audio_query_json AudioQueryのJSON文字列
+/// @param [in] style_id スタイルID
+/// @param [in] options オプション
+/// @param [out] output_wav_length 出力のバイト長
+/// @param [out] output_wav 出力先
+///
+/// @returns 結果コード
+///
+/// \safety{
+/// - `audio_query_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `output_wav_length`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// - `output_wav`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_synthesizer_synthesis}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_synthesis(const struct VoicevoxSynthesizer *synthesizer, const char *audio_query_json, VoicevoxStyleId style_id, struct VoicevoxSynthesisOptions options, uintptr_t *output_wav_length, uint8_t **output_wav)
+/// ```
+({int result, Uint8List wav}) voicevoxxSynthesizerSynthesis(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  String audioQueryJson,
+  int styleId, {
+  VoicevoxxSynthesisOptions? options,
+}) {
+  options ??= voicevoxxMakeDefaultSynthesisOptions();
+  late Uint8List wav;
+  final optionsPointer = options.calloc();
+  final wavLengthPointer = calloc<UintPtr>();
+  final wavPointer = calloc<Pointer<Uint8>>();
+  final result = voicevoxSynthesizerSynthesis(
+    synthesizer,
+    audioQueryJson,
+    styleId,
+    optionsPointer.ref,
+    wavLengthPointer,
+    wavPointer,
+  );
+  if (result == VOICEVOX_RESULT_OK) {
+    wav = Uint8List.fromList(
+      wavPointer.value.asTypedList(wavLengthPointer.value),
+    );
+    voicevoxWavFree(wavPointer.value);
+  } else {
+    wav = Uint8List(0);
+  }
+  calloc
+    ..free(optionsPointer)
+    ..free(wavLengthPointer)
+    ..free(wavPointer);
+  return (result: result, wav: wav);
+}
+
+///
+/// デフォルトのテキスト音声合成オプションを生成する
+/// @return テキスト音声合成オプション
+///
+/// \no-orig-impl{voicevox_make_default_tts_options}
+///
+/// ```c
+/// __declspec(dllimport) struct VoicevoxTtsOptions voicevox_make_default_tts_options(void)
+/// ```
+VoicevoxxTtsOptions voicevoxxMakeDefaultTtsOptions() =>
+    VoicevoxxTtsOptions()..loadFromEntity(voicevoxMakeDefaultTtsOptions());
+
+///
 /// AquesTalk風記法から音声合成を行う。
 ///
 /// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
@@ -659,33 +959,38 @@ voicevoxxSynthesizerReplacePhonemeLength(
 /// ```c
 /// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_tts_from_kana(const struct VoicevoxSynthesizer *synthesizer, const char *kana, VoicevoxStyleId style_id, struct VoicevoxTtsOptions options, uintptr_t *output_wav_length, uint8_t **output_wav)
 /// ```
-({int result, Pointer<Uint8> wav, int wavLength})
-voicevoxxSynthesizerTtsFromKana(
+({int result, Uint8List wav}) voicevoxxSynthesizerTtsFromKana(
   Pointer<VoicevoxSynthesizer> synthesizer,
   String kana,
-  int styleId,
-  VoicevoxTtsOptions options,
-) {
-  Pointer<Uint8> wav = nullptr;
-  var wavLength = 0;
+  int styleId, {
+  VoicevoxxTtsOptions? options,
+}) {
+  options ??= voicevoxxMakeDefaultTtsOptions();
+  late Uint8List wav;
+  final optionsPointer = options.calloc();
   final wavLengthPointer = calloc<UintPtr>();
   final wavPointer = calloc<Pointer<Uint8>>();
   final result = voicevoxSynthesizerTtsFromKana(
     synthesizer,
     kana,
     styleId,
-    options,
+    optionsPointer.ref,
     wavLengthPointer,
     wavPointer,
   );
   if (result == VOICEVOX_RESULT_OK) {
-    wav = wavPointer.value;
-    wavLength = wavLengthPointer.value;
+    wav = Uint8List.fromList(
+      wavPointer.value.asTypedList(wavLengthPointer.value),
+    );
+    voicevoxWavFree(wavPointer.value);
+  } else {
+    wav = Uint8List(0);
   }
   calloc
+    ..free(optionsPointer)
     ..free(wavLengthPointer)
     ..free(wavPointer);
-  return (result: result, wav: wav, wavLength: wavLength);
+  return (result: result, wav: wav);
 }
 
 ///
@@ -718,32 +1023,38 @@ voicevoxxSynthesizerTtsFromKana(
 /// ```c
 /// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_tts(const struct VoicevoxSynthesizer *synthesizer, const char *text, VoicevoxStyleId style_id, struct VoicevoxTtsOptions options, uintptr_t *output_wav_length, uint8_t **output_wav)
 /// ```
-({int result, Pointer<Uint8> wav, int wavLength}) voicevoxxSynthesizerTts(
+({int result, Uint8List wav}) voicevoxxSynthesizerTts(
   Pointer<VoicevoxSynthesizer> synthesizer,
   String text,
-  int styleId,
-  VoicevoxTtsOptions options,
-) {
-  Pointer<Uint8> wav = nullptr;
-  var wavLength = 0;
+  int styleId, {
+  VoicevoxxTtsOptions? options,
+}) {
+  options ??= voicevoxxMakeDefaultTtsOptions();
+  late Uint8List wav;
+  final optionsPointer = options.calloc();
   final wavLengthPointer = calloc<UintPtr>();
   final wavPointer = calloc<Pointer<Uint8>>();
   final result = voicevoxSynthesizerTts(
     synthesizer,
     text,
     styleId,
-    options,
+    optionsPointer.ref,
     wavLengthPointer,
     wavPointer,
   );
   if (result == VOICEVOX_RESULT_OK) {
-    wav = wavPointer.value;
-    wavLength = wavLengthPointer.value;
+    wav = Uint8List.fromList(
+      wavPointer.value.asTypedList(wavLengthPointer.value),
+    );
+    voicevoxWavFree(wavPointer.value);
+  } else {
+    wav = Uint8List(0);
   }
   calloc
+    ..free(optionsPointer)
     ..free(wavLengthPointer)
     ..free(wavPointer);
-  return (result: result, wav: wav, wavLength: wavLength);
+  return (result: result, wav: wav);
 }
 
 ///
@@ -966,14 +1277,12 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
 /// ```c
 /// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_frame_synthesis(const struct VoicevoxSynthesizer *synthesizer, const char *frame_audio_query_json, VoicevoxStyleId style_id, uintptr_t *output_wav_length, uint8_t **output_wav)
 /// ```
-({int result, Pointer<Uint8> wav, int wavLength})
-voicevoxxSynthesizerFrameSynthesis(
+({int result, Uint8List wav}) voicevoxxSynthesizerFrameSynthesis(
   Pointer<VoicevoxSynthesizer> synthesizer,
   String frameAudioQueryJson,
   int styleId,
 ) {
-  Pointer<Uint8> wav = nullptr;
-  var wavLength = 0;
+  late Uint8List wav;
   final wavLengthPointer = calloc<UintPtr>();
   final wavPointer = calloc<Pointer<Uint8>>();
   final result = voicevoxSynthesizerFrameSynthesis(
@@ -984,13 +1293,118 @@ voicevoxxSynthesizerFrameSynthesis(
     wavPointer,
   );
   if (result == VOICEVOX_RESULT_OK) {
-    wav = wavPointer.value;
-    wavLength = wavLengthPointer.value;
+    wav = Uint8List.fromList(
+      wavPointer.value.asTypedList(wavLengthPointer.value),
+    );
+    voicevoxWavFree(wavPointer.value);
+  } else {
+    wav = Uint8List(0);
   }
   calloc
     ..free(wavLengthPointer)
     ..free(wavPointer);
-  return (result: result, wav: wav, wavLength: wavLength);
+  return (result: result, wav: wav);
+}
+
+///
+/// ユーザー辞書に単語を追加する。
+///
+/// @param [in] ユーザー辞書
+/// @param [in] word 追加する単語
+/// @param [out] output_word_uuid 追加した単語のUUID
+/// @returns 結果コード
+///
+/// # Safety
+/// @param user_dict は有効な :VoicevoxUserDict のポインタであること
+///
+/// \safety{
+/// - `word->surface`と`word->pronunciation`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `output_word_uuid`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_user_dict_add_word}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_user_dict_add_word(const struct VoicevoxUserDict *user_dict, const struct VoicevoxUserDictWord *word, uint8_t (*output_word_uuid)[16])
+/// ```
+({int result, Uint8List wordUuid}) voicevoxxUserDictAddWord(
+  Pointer<VoicevoxUserDict> userDict,
+  VoicevoxxUserDictWord word,
+) {
+  final wordPointer = word.calloc();
+  final wordUuidPointer = calloc<Uint8>(16);
+  final result = voicevoxUserDictAddWord(
+    userDict,
+    wordPointer,
+    wordUuidPointer,
+  );
+  final wordUuid = Uint8List.fromList(wordUuidPointer.asTypedList(16));
+  calloc.free(wordUuidPointer);
+  wordPointer.callocAllFree();
+  return (result: result, wordUuid: wordUuid);
+}
+
+///
+/// ユーザー辞書の単語を更新する。
+///
+/// @param [in] user_dict ユーザー辞書
+/// @param [in] word_uuid 更新する単語のUUID
+/// @param [in] word 新しい単語のデータ
+/// @returns 結果コード
+///
+/// \safety{
+/// - `word_uuid`は<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `word->surface`と`word->pronunciation`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_user_dict_update_word}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_user_dict_update_word(const struct VoicevoxUserDict *user_dict, const uint8_t (*word_uuid)[16], const struct VoicevoxUserDictWord *word)
+/// ```
+int voicevoxxUserDictUpdateWord(
+  Pointer<VoicevoxUserDict> userDict,
+  Uint8List wordUuid,
+  VoicevoxxUserDictWord word,
+) {
+  final wordUuidPointer = calloc<Uint8>(16);
+  final wordPointer = word.calloc();
+  wordUuidPointer.asTypedList(16).setAll(0, wordUuid);
+  final result = voicevoxUserDictUpdateWord(
+    userDict,
+    wordUuidPointer,
+    wordPointer,
+  );
+  calloc.free(wordUuidPointer);
+  wordPointer.callocAllFree();
+  return result;
+}
+
+///
+/// ユーザー辞書から単語を削除する。
+///
+/// @param [in] user_dict ユーザー辞書
+/// @param [in] word_uuid 削除する単語のUUID
+/// @returns 結果コード
+///
+/// \safety{
+/// - `word_uuid`は<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_user_dict_remove_word}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_user_dict_remove_word(const struct VoicevoxUserDict *user_dict, const uint8_t (*word_uuid)[16])
+/// ```
+int voicevoxxUserDictRemoveWord(
+  Pointer<VoicevoxUserDict> userDict,
+  Uint8List wordUuid,
+) {
+  final wordUuidPointer = calloc<Uint8>(16);
+  wordUuidPointer.asTypedList(16).setAll(0, wordUuid);
+  final result = voicevoxUserDictRemoveWord(userDict, wordUuidPointer);
+  calloc.free(wordUuidPointer);
+  return result;
 }
 
 ///
