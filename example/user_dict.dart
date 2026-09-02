@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:voicevox_core/voicevox_core.dart';
 
 const gOpenJtalkDicPath = 'assets/open_jtalk_dic_utf_8-1.11';

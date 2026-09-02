@@ -24,16 +24,19 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   /// @param [in] model 音声モデル
+  /// @param [in] options オプション
   ///
   /// @returns 結果コード
   ///
   /// \orig-impl{voicevox_synthesizer_load_voice_model}
   ///
   /// ```c
-  /// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_load_voice_model(const struct VoicevoxSynthesizer *synthesizer, const struct VoicevoxVoiceModelFile *model)
+  /// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_load_voice_model(const struct VoicevoxSynthesizer *synthesizer, const struct VoicevoxVoiceModelFile *model, struct VoicevoxLoadVoiceModelOptions options)
   /// ```
-  int loadModel(Pointer<VoicevoxVoiceModelFile> model) =>
-      voicevoxSynthesizerLoadVoiceModel(this, model);
+  int loadModel(
+    Pointer<VoicevoxVoiceModelFile> model, {
+    VoicevoxxLoadVoiceModelOptions? options,
+  }) => voicevoxxSynthesizerLoadVoiceModel(this, model, options: options);
 
   ///
   /// 音声モデルの読み込みを解除する。

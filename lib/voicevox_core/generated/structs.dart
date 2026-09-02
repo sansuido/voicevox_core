@@ -12,6 +12,11 @@ final class VoicevoxInitializeOptions extends Struct {
   external int cpuNumThreads;
 }
 
+final class VoicevoxLoadVoiceModelOptions extends Struct {
+  @Int32()
+  external int onExisting;
+}
+
 final class VoicevoxSynthesisOptions extends Struct {
   @Bool()
   external bool enableInterrogativeUpspeak;
@@ -29,6 +34,6 @@ final class VoicevoxUserDictWord extends Struct {
   external int accentType;
   @Int32()
   external int wordType;
-  @Uint32()
+  @Uint8()
   external int priority;
 }

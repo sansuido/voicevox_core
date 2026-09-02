@@ -3,48 +3,88 @@
 part of '../core.dart';
 
 ///
-/// ONNX Runtimeの動的ライブラリの、バージョン付きのファイル名。
+/// 必要なONNX Runtime 1.xの最小マイナーバージョンを取得する。
 ///
-/// WindowsとAndroidでは ::voicevox_get_onnxruntime_lib_unversioned_filename と同じ。
+/// @return 必要な最小マイナーバージョン
+///
+/// \orig-impl{voicevox_get_onnxruntime_lib_min_required_minor_version}
+///
+/// ```c
+/// __declspec(dllimport) uint32_t voicevox_get_onnxruntime_lib_min_required_minor_version(void)
+/// ```
+int voicevoxGetOnnxruntimeLibMinRequiredMinorVersion() {
+  final voicevoxGetOnnxruntimeLibMinRequiredMinorVersionLookupFunction =
+      _libCore.lookupFunction<Uint32 Function(), int Function()>(
+        'voicevox_get_onnxruntime_lib_min_required_minor_version',
+      );
+
+  return voicevoxGetOnnxruntimeLibMinRequiredMinorVersionLookupFunction();
+}
+
+///
+/// サポートされるONNX Runtime 1.xの最大マイナーバージョンを取得する。
+///
+/// @return サポートされる最大マイナーバージョン
+///
+/// \orig-impl{voicevox_get_onnxruntime_lib_max_supported_minor_version}
+///
+/// ```c
+/// __declspec(dllimport) uint32_t voicevox_get_onnxruntime_lib_max_supported_minor_version(void)
+/// ```
+int voicevoxGetOnnxruntimeLibMaxSupportedMinorVersion() {
+  final voicevoxGetOnnxruntimeLibMaxSupportedMinorVersionLookupFunction =
+      _libCore.lookupFunction<Uint32 Function(), int Function()>(
+        'voicevox_get_onnxruntime_lib_max_supported_minor_version',
+      );
+
+  return voicevoxGetOnnxruntimeLibMaxSupportedMinorVersionLookupFunction();
+}
+
+///
+/// 推奨されるONNX Runtimeの動的ライブラリの、バージョン付きのファイル名。
+///
+/// WindowsとAndroidでは ::voicevox_get_onnxruntime_lib_recommended_unversioned_filename と同じ。
 ///
 /// \availability{
 /// [リリース](https://github.com/voicevox/voicevox_core/releases)されているライブラリではiOSを除くプラットフォームで利用可能。詳細は<a href="#voicevox-core-availability">ファイルレベルの"Availability"の節</a>を参照。
 /// }
 ///
-/// \orig-impl{voicevox_get_onnxruntime_lib_versioned_filename}
+/// \orig-impl{voicevox_get_onnxruntime_lib_recommended_versioned_filename}
 ///
 /// ```c
-/// __declspec(dllimport) const char *voicevox_get_onnxruntime_lib_versioned_filename(void)
+/// __declspec(dllimport) const char *voicevox_get_onnxruntime_lib_recommended_versioned_filename(void)
 /// ```
-String? voicevoxGetOnnxruntimeLibVersionedFilename() {
-  final voicevoxGetOnnxruntimeLibVersionedFilenameLookupFunction = _libCore
-      .lookupFunction<Pointer<Utf8> Function(), Pointer<Utf8> Function()>(
-        'voicevox_get_onnxruntime_lib_versioned_filename',
-      );
+String? voicevoxGetOnnxruntimeLibRecommendedVersionedFilename() {
+  final voicevoxGetOnnxruntimeLibRecommendedVersionedFilenameLookupFunction =
+      _libCore
+          .lookupFunction<Pointer<Utf8> Function(), Pointer<Utf8> Function()>(
+            'voicevox_get_onnxruntime_lib_recommended_versioned_filename',
+          );
 
-  return voicevoxGetOnnxruntimeLibVersionedFilenameLookupFunction()
+  return voicevoxGetOnnxruntimeLibRecommendedVersionedFilenameLookupFunction()
       .toDartString();
 }
 
 ///
-/// ONNX Runtimeの動的ライブラリの、バージョン無しのファイル名。
+/// 推奨されるONNX Runtimeの動的ライブラリの、バージョン無しのファイル名。
 ///
 /// \availability{
 /// [リリース](https://github.com/voicevox/voicevox_core/releases)されているライブラリではiOSを除くプラットフォームで利用可能。詳細は<a href="#voicevox-core-availability">ファイルレベルの"Availability"の節</a>を参照。
 /// }
 ///
-/// \orig-impl{voicevox_get_onnxruntime_lib_unversioned_filename}
+/// \orig-impl{voicevox_get_onnxruntime_lib_recommended_unversioned_filename}
 ///
 /// ```c
-/// __declspec(dllimport) const char *voicevox_get_onnxruntime_lib_unversioned_filename(void)
+/// __declspec(dllimport) const char *voicevox_get_onnxruntime_lib_recommended_unversioned_filename(void)
 /// ```
-String? voicevoxGetOnnxruntimeLibUnversionedFilename() {
-  final voicevoxGetOnnxruntimeLibUnversionedFilenameLookupFunction = _libCore
-      .lookupFunction<Pointer<Utf8> Function(), Pointer<Utf8> Function()>(
-        'voicevox_get_onnxruntime_lib_unversioned_filename',
-      );
+String? voicevoxGetOnnxruntimeLibRecommendedUnversionedFilename() {
+  final voicevoxGetOnnxruntimeLibRecommendedUnversionedFilenameLookupFunction =
+      _libCore
+          .lookupFunction<Pointer<Utf8> Function(), Pointer<Utf8> Function()>(
+            'voicevox_get_onnxruntime_lib_recommended_unversioned_filename',
+          );
 
-  return voicevoxGetOnnxruntimeLibUnversionedFilenameLookupFunction()
+  return voicevoxGetOnnxruntimeLibRecommendedUnversionedFilenameLookupFunction()
       .toDartString();
 }
 
@@ -97,6 +137,8 @@ Pointer<VoicevoxOnnxruntime> voicevoxOnnxruntimeGet() {
 ///
 /// ONNX Runtimeをロードして初期化する。
 ///
+/// 対象のONNX Runtimeのマイナーバージョンは ::voicevox_get_onnxruntime_lib_min_required_minor_version 以上でなければならない。 ::voicevox_get_onnxruntime_lib_max_supported_minor_version よりも大きい場合は警告を出す。
+///
 /// 一度成功したら、以後は引数を無視して同じ参照を返す。
 ///
 /// @param [in] options オプション
@@ -139,6 +181,8 @@ int voicevoxOnnxruntimeLoadOnce(
 
 ///
 /// ONNX Runtimeを初期化する。
+///
+/// リンクされているONNX Runtimeのマイナーバージョンが ::voicevox_get_onnxruntime_lib_min_required_minor_version よりも小さい場合失敗する。 ::voicevox_get_onnxruntime_lib_max_supported_minor_version よりも大きい場合は警告を出す。
 ///
 /// 一度成功したら以後は同じ参照を返す。
 ///
@@ -401,19 +445,13 @@ int voicevoxAudioQueryCreateFromAccentPhrases(
 ///
 /// - [Rust APIの`AudioQuery`型]としてデシリアライズ不可、もしくはJSONとして不正。
 /// - `accent_phrases`の要素のうちいずれかが、 ::voicevox_accent_phrase_validate でエラーになる。
-/// - `outputSamplingRate`が`24000`の倍数ではない、もしくは`0` (将来的に解消予定。cf. [#762])。
 ///
 /// [Rust APIの`AudioQuery`型]: ../rust_api/voicevox_core/struct.AudioQuery.html
 /// [#762]: https://github.com/VOICEVOX/voicevox_core/issues/762
 ///
 /// 次の状態に対しては警告のログを出す。将来的にはエラーになる予定。
 ///
-/// - `accent_phrases`の要素のうちいずれかが警告が出る状態。
-/// - `speedScale`が負。
-/// - `volumeScale`が負。
-/// - `prePhonemeLength`が負。
-/// - `postPhonemeLength`が負。
-/// - `outputSamplingRate`が`24000`以外の値（エラーと同様将来的に解消予定）。
+/// - `outputSamplingRate`が`24000`以外の値（将来的に解消予定。cf. [#762]）。
 ///
 /// @param [in] audio_query_json `AudioQuery`型のJSON
 ///
@@ -452,14 +490,9 @@ int voicevoxAudioQueryValidate(String? audioQueryJson) {
 ///
 /// - [Rust APIの`AccentPhrase`型]としてデシリアライズ不可、もしくはJSONとして不正。
 /// - `moras`もしくは`pause_mora`の要素のうちいずれかが、 ::voicevox_mora_validate でエラーになる。
-/// - `accent`が`0`。
+/// - `accent`が`moras`の数を超過している。
 ///
 /// [Rust APIの`AccentPhrase`型]: ../rust_api/voicevox_core/struct.AccentPhrase.html
-///
-/// 次の状態に対しては警告のログを出す。将来的にはエラーになる予定。
-///
-/// - `moras`もしくは`pause_mora`の要素のうちいずれかが、警告が出る状態。
-/// - `accent`が`moras`の数を超過している。
 ///
 /// @param [in] accent_phrase_json `AccentPhrase`型のJSON
 ///
@@ -498,15 +531,8 @@ int voicevoxAccentPhraseValidate(String? accentPhraseJson) {
 ///
 /// - [Rust APIの`Mora`型]としてデシリアライズ不可、もしくはJSONとして不正。
 /// - `consonant`と`consonant_length`の有無が不一致。
-/// - `consonant`が子音以外の音素であるか、もしくは音素として不正。
-/// - `vowel`が子音であるか、もしくは音素として不正。
 ///
 /// [Rust APIの`Mora`型]: ../rust_api/voicevox_core/struct.Mora.html
-///
-/// 次の状態に対しては警告のログを出す。将来的にはエラーになる予定。
-///
-/// - `consonant_length`が負。
-/// - `vowel_length`が負。
 ///
 /// @param [in] mora_json `Mora`型のJSON
 ///
@@ -927,35 +953,62 @@ void voicevoxSynthesizerDelete(Pointer<VoicevoxSynthesizer> synthesizer) {
 }
 
 ///
+/// デフォルトの `voicevox_synthesizer_load_voice_model` のオプションを生成する
+/// @return デフォルト値が設定された `voicevox_synthesizer_load_voice_model` のオプション
+///
+/// \no-orig-impl{voicevox_make_default_load_voice_model_options}
+///
+/// ```c
+/// __declspec(dllimport) struct VoicevoxLoadVoiceModelOptions voicevox_make_default_load_voice_model_options(void)
+/// ```
+VoicevoxLoadVoiceModelOptions voicevoxMakeDefaultLoadVoiceModelOptions() {
+  final voicevoxMakeDefaultLoadVoiceModelOptionsLookupFunction = _libCore
+      .lookupFunction<
+        VoicevoxLoadVoiceModelOptions Function(),
+        VoicevoxLoadVoiceModelOptions Function()
+      >('voicevox_make_default_load_voice_model_options');
+
+  return voicevoxMakeDefaultLoadVoiceModelOptionsLookupFunction();
+}
+
+///
 /// 音声モデルを読み込む。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 /// @param [in] model 音声モデル
+/// @param [in] options オプション
 ///
 /// @returns 結果コード
 ///
 /// \orig-impl{voicevox_synthesizer_load_voice_model}
 ///
 /// ```c
-/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_load_voice_model(const struct VoicevoxSynthesizer *synthesizer, const struct VoicevoxVoiceModelFile *model)
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_load_voice_model(const struct VoicevoxSynthesizer *synthesizer, const struct VoicevoxVoiceModelFile *model, struct VoicevoxLoadVoiceModelOptions options)
 /// ```
 int voicevoxSynthesizerLoadVoiceModel(
   Pointer<VoicevoxSynthesizer> synthesizer,
   Pointer<VoicevoxVoiceModelFile> model,
+  VoicevoxLoadVoiceModelOptions options,
 ) {
   final voicevoxSynthesizerLoadVoiceModelLookupFunction = _libCore
       .lookupFunction<
         Int32 Function(
           Pointer<VoicevoxSynthesizer>,
           Pointer<VoicevoxVoiceModelFile>,
+          VoicevoxLoadVoiceModelOptions,
         ),
         int Function(
           Pointer<VoicevoxSynthesizer>,
           Pointer<VoicevoxVoiceModelFile>,
+          VoicevoxLoadVoiceModelOptions,
         )
       >('voicevox_synthesizer_load_voice_model');
 
-  return voicevoxSynthesizerLoadVoiceModelLookupFunction(synthesizer, model);
+  return voicevoxSynthesizerLoadVoiceModelLookupFunction(
+    synthesizer,
+    model,
+    options,
+  );
 }
 
 ///

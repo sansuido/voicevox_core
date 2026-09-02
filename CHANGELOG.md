@@ -1,3 +1,11 @@
+## 1.1.0
+
+- Supported `voicevox_core` v0.17.0.
+- Added functions (`voicevoxGetOnnxruntimeLibMinRequiredMinorVersion`, `voicevoxGetOnnxruntimeLibMaxSupportedMinorVersion`, `voicevoxGetOnnxruntimeLibRecommendedUnversionedFilename`, `voicevoxMakeDefaultLoadVoiceModelOptions`).
+- Changed function (`voicevoxSynthesizerLoadVoiceModel`).
+- Updated environment/dependencies:
+  - sdk: '>=3.13.2 <4.0.0'
+
 ## 1.0.0
 
 - Added all glue functions.

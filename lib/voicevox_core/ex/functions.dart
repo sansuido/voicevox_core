@@ -23,6 +23,8 @@ VoicevoxxLoadOnnxruntimeOptions voicevoxxMakeDefaultLoadOnnxruntimeOptions() =>
 ///
 /// ONNX Runtimeをロードして初期化する。
 ///
+/// 対象のONNX Runtimeのマイナーバージョンは ::voicevox_get_onnxruntime_lib_min_required_minor_version 以上でなければならない。 ::voicevox_get_onnxruntime_lib_max_supported_minor_version よりも大きい場合は警告を出す。
+///
 /// 一度成功したら、以後は引数を無視して同じ参照を返す。
 ///
 /// @param [in] options オプション
@@ -74,6 +76,8 @@ voicevoxxOnnxruntimeLoadOnce({VoicevoxxLoadOnnxruntimeOptions? options}) {
 
 ///
 /// ONNX Runtimeを初期化する。
+///
+/// リンクされているONNX Runtimeのマイナーバージョンが ::voicevox_get_onnxruntime_lib_min_required_minor_version よりも小さい場合失敗する。 ::voicevox_get_onnxruntime_lib_max_supported_minor_version よりも大きい場合は警告を出す。
 ///
 /// 一度成功したら以後は同じ参照を返す。
 ///
@@ -347,6 +351,49 @@ voicevoxxSynthesizerNew(
     ..free(optionsPointer)
     ..free(synthesizerPointer);
   return (result: result, synthesizer: synthesizer);
+}
+
+///
+/// デフォルトの `voicevox_synthesizer_load_voice_model` のオプションを生成する
+/// @return デフォルト値が設定された `voicevox_synthesizer_load_voice_model` のオプション
+///
+/// \no-orig-impl{voicevox_make_default_load_voice_model_options}
+///
+/// ```c
+/// __declspec(dllimport) struct VoicevoxLoadVoiceModelOptions voicevox_make_default_load_voice_model_options(void)
+/// ```
+VoicevoxxLoadVoiceModelOptions voicevoxxMakeDefaultLoadVoiceModelOptions() =>
+    VoicevoxxLoadVoiceModelOptions()
+      ..loadFromEntity(voicevoxMakeDefaultLoadVoiceModelOptions());
+
+///
+/// 音声モデルを読み込む。
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] model 音声モデル
+/// @param [in] options オプション
+///
+/// @returns 結果コード
+///
+/// \orig-impl{voicevox_synthesizer_load_voice_model}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_load_voice_model(const struct VoicevoxSynthesizer *synthesizer, const struct VoicevoxVoiceModelFile *model, struct VoicevoxLoadVoiceModelOptions options)
+/// ```
+int voicevoxxSynthesizerLoadVoiceModel(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  Pointer<VoicevoxVoiceModelFile> model, {
+  VoicevoxxLoadVoiceModelOptions? options,
+}) {
+  options ??= VoicevoxxLoadVoiceModelOptions();
+  final optionsPointer = options.calloc();
+  final result = voicevoxSynthesizerLoadVoiceModel(
+    synthesizer,
+    model,
+    optionsPointer.ref,
+  );
+  calloc.free(optionsPointer);
+  return result;
 }
 
 ///
