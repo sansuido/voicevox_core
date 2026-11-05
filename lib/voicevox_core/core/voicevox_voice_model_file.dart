@@ -23,7 +23,7 @@ extension VoicevoxVoiceModelFilePointerEx on Pointer<VoicevoxVoiceModelFile> {
   ///
   /// ::VoicevoxVoiceModelFile からメタ情報を取得する。
   ///
-  /// JSONの解放は ::voicevox_json_free で行う。
+  /// JSONの解放は ::voicevox_string_free で行う。
   ///
   /// @param [in] model 音声モデル
   ///

@@ -17,8 +17,9 @@ part of '../core.dart';
 /// __declspec(dllimport) struct VoicevoxLoadOnnxruntimeOptions voicevox_make_default_load_onnxruntime_options(void)
 /// ```
 VoicevoxxLoadOnnxruntimeOptions voicevoxxMakeDefaultLoadOnnxruntimeOptions() =>
-    VoicevoxxLoadOnnxruntimeOptions()
-      ..loadFromEntity(voicevoxMakeDefaultLoadOnnxruntimeOptions());
+    VoicevoxxLoadOnnxruntimeOptions.fromEntity(
+      voicevoxMakeDefaultLoadOnnxruntimeOptions(),
+    );
 
 ///
 /// ONNX Runtimeをロードして初期化する。
@@ -54,14 +55,13 @@ voicevoxxOnnxruntimeLoadOnce({VoicevoxxLoadOnnxruntimeOptions? options}) {
       'onnxruntime',
     );
     if (onnxruntimeFilename != null) {
-      options0 = voicevoxxMakeDefaultLoadOnnxruntimeOptions()
-        ..filename = onnxruntimeFilename;
+      options0 = VoicevoxxLoadOnnxruntimeOptions(filename: onnxruntimeFilename);
     }
   }
   options0 ??= voicevoxxMakeDefaultLoadOnnxruntimeOptions();
   Pointer<VoicevoxOnnxruntime> onnxruntime = nullptr;
   final optionsPointer = options0.calloc();
-  final onnxruntimePointer = calloc<Pointer<VoicevoxOnnxruntime>>();
+  final onnxruntimePointer = ffi.calloc<Pointer<VoicevoxOnnxruntime>>();
   final result = voicevoxOnnxruntimeLoadOnce(
     optionsPointer.ref,
     onnxruntimePointer,
@@ -69,7 +69,7 @@ voicevoxxOnnxruntimeLoadOnce({VoicevoxxLoadOnnxruntimeOptions? options}) {
   if (result == VOICEVOX_RESULT_OK) {
     onnxruntime = onnxruntimePointer.value;
   }
-  calloc.free(onnxruntimePointer);
+  ffi.calloc.free(onnxruntimePointer);
   optionsPointer.callocAllFree();
   return (result: result, onnxruntime: onnxruntime);
 }
@@ -101,12 +101,12 @@ voicevoxxOnnxruntimeLoadOnce({VoicevoxxLoadOnnxruntimeOptions? options}) {
 ({Pointer<VoicevoxOnnxruntime> onnxruntime, int result})
 voicevoxxOnnxruntimeInitOnce() {
   Pointer<VoicevoxOnnxruntime> onnxruntime = nullptr;
-  final onnxruntimePointer = calloc<Pointer<VoicevoxOnnxruntime>>();
+  final onnxruntimePointer = ffi.calloc<Pointer<VoicevoxOnnxruntime>>();
   final result = voicevoxOnnxruntimeInitOnce(onnxruntimePointer);
   if (result == VOICEVOX_RESULT_OK) {
     onnxruntime = onnxruntimePointer.value;
   }
-  calloc.free(onnxruntimePointer);
+  ffi.calloc.free(onnxruntimePointer);
   return (result: result, onnxruntime: onnxruntime);
 }
 
@@ -141,19 +141,19 @@ voicevoxxOnnxruntimeInitOnce() {
   String openJtalkDicDir,
 ) {
   Pointer<OpenJtalkRc> openJtalk = nullptr;
-  final openJtalkPointer = calloc<Pointer<OpenJtalkRc>>();
+  final openJtalkPointer = ffi.calloc<Pointer<OpenJtalkRc>>();
   final result = voicevoxOpenJtalkRcNew(openJtalkDicDir, openJtalkPointer);
   if (result == VOICEVOX_RESULT_OK) {
     openJtalk = openJtalkPointer.value;
   }
-  calloc.free(openJtalkPointer);
+  ffi.calloc.free(openJtalkPointer);
   return (result: result, openJtalk: openJtalk);
 }
 
 ///
 /// 日本語のテキストを解析する。
 ///
-/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+/// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
 ///
 /// @param [in] open_jtalk Open JTalkのオブジェクト
 /// @param [in] text UTF-8の日本語テキスト
@@ -169,7 +169,7 @@ voicevoxxOnnxruntimeInitOnce() {
   String text,
 ) {
   var accentPhrasesJson = '';
-  final accentPhrasesJsonPointer = calloc<Pointer<Int8>>();
+  final accentPhrasesJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxOpenJtalkRcAnalyze(
     openJtalk,
     text,
@@ -177,11 +177,11 @@ voicevoxxOnnxruntimeInitOnce() {
   );
   if (result == VOICEVOX_RESULT_OK) {
     accentPhrasesJson = accentPhrasesJsonPointer.value
-        .cast<Utf8>()
+        .cast<ffi.Utf8>()
         .toDartString();
-    voicevoxJsonFree(accentPhrasesJsonPointer.value);
+    voicevoxStringFree(accentPhrasesJsonPointer.value);
   }
-  calloc.free(accentPhrasesJsonPointer);
+  ffi.calloc.free(accentPhrasesJsonPointer);
   return (result: result, accentPhrasesJson: accentPhrasesJson);
 }
 
@@ -195,13 +195,14 @@ voicevoxxOnnxruntimeInitOnce() {
 /// __declspec(dllimport) struct VoicevoxInitializeOptions voicevox_make_default_initialize_options(void)
 /// ```
 VoicevoxxInitializeOptions voicevoxxMakeDefaultInitializeOptions() =>
-    VoicevoxxInitializeOptions()
-      ..loadFromEntity(voicevoxMakeDefaultInitializeOptions());
+    VoicevoxxInitializeOptions.fromEntity(
+      voicevoxMakeDefaultInitializeOptions(),
+    );
 
 ///
 /// AccentPhraseの配列からAudioQueryを作る。
 ///
-/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+/// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
 ///
 /// @param [in] accent_phrases_json AccentPhraseの配列のJSON文字列
 /// @param [out] output_accent_phrases_json 生成先
@@ -219,17 +220,263 @@ VoicevoxxInitializeOptions voicevoxxMakeDefaultInitializeOptions() =>
 ({String audioQueryJson, int result})
 voicevoxxAudioQueryCreateFromAccentPhrases(String accentPhrasesJson) {
   var audioQueryJson = '';
-  final autioQueryJsonPointer = calloc<Pointer<Int8>>();
+  final autioQueryJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxAudioQueryCreateFromAccentPhrases(
     accentPhrasesJson,
     autioQueryJsonPointer,
   );
   if (result == VOICEVOX_RESULT_OK) {
-    audioQueryJson = autioQueryJsonPointer.value.cast<Utf8>().toDartString();
-    voicevoxJsonFree(autioQueryJsonPointer.value);
+    audioQueryJson = autioQueryJsonPointer.value
+        .cast<ffi.Utf8>()
+        .toDartString();
+    voicevoxStringFree(autioQueryJsonPointer.value);
   }
-  calloc.free(autioQueryJsonPointer);
+  ffi.calloc.free(autioQueryJsonPointer);
   return (audioQueryJson: audioQueryJson, result: result);
+}
+
+///
+/// デフォルトの `voicevox_audio_query_frame_length` のオプションを生成する。
+///
+/// @return デフォルト値が設定された `voicevox_audio_query_frame_length` のオプション
+///
+/// \no-orig-impl{voicevox_make_default_audio_query_frame_length_options}
+///
+/// ```c
+/// __declspec(dllimport) struct VoicevoxAudioQueryFrameLengthOptions voicevox_make_default_audio_query_frame_length_options(void)
+/// ```
+VoicevoxxAudioQueryFrameLengthOptions
+voicevoxxMakeDefaultAudioQueryFrameLengthOptions() =>
+    VoicevoxxAudioQueryFrameLengthOptions.fromEntity(
+      voicevoxMakeDefaultAudioQueryFrameLengthOptions(),
+    );
+
+///
+/// 音声の総フレーム数を算出する。
+///
+/// 音声の秒数は、フレーム数を ::VOICEVOX_FRAME_RATE で割った値で表せる。
+///
+/// 算出した値は[`SIZE_MAX`]で飽和する。算出方法は以下の通り。
+///
+/// 1. 以下の秒数を32-bit浮動小数点数として解釈して集める。
+/// - [`AudioQuery::pre_phoneme_length`]
+/// - [`AudioQuery::accent_phrases`]の要素ごとに
+/// - [`AccentPhrase::moras`]の要素ごとに
+/// - [`Mora::consonant_length`]
+/// - [`Mora::vowel_length`]
+/// - ::VoicevoxAudioQueryFrameLengthOptions::enable_interrogative_upspeak
+/// かつ[`AccentPhrase::is_interrogative`]かつ`moras`の最後の[`Mora::pitch`]が`0.0`以外のとき、`0.15`秒
+/// - [`AccentPhrase::pause_mora`]の`Mora::consonant_length`（通常はない）
+/// - `AccentPhrase::pause_mora`の`Mora::vowel_length`
+/// - [`AudioQuery::post_phoneme_length`]
+/// 2. それぞれの秒数を`secs`として、対応するフレーム長を`round_ties_even(round_ties_even(secs * (float)VOICEVOX_FRAME_RATE) / speed_scale)`として算出する。ここで`round_ties_even`は[Rustの`f32::round_ties_even`]であり、libmの[`roundevenf(3)`]と同様IEEE 754の`roundToIntegralTiesToEven`演算を行う。[`AudioQuery::speed_scale`]も32-bit浮動小数点数として解釈し、乗算と除算も32-bit浮動小数点数上で行う。
+/// 3. 各フレーム長を足し合わせる。
+///
+/// `AudioQuery`に対応する音声の長さは将来的に変わる可能性がある。例えば、秒数を64-bit浮動小数点数として解釈しているVOICEVOX
+/// ENGINEと挙動を揃える可能性がある。
+///
+/// [`SIZE_MAX`]: https://en.cppreference.com/c/types/limits
+/// [`AudioQuery::pre_phoneme_length`]: ../rust_api/voicevox_core/struct.AudioQuery.html#structfield.pre_phoneme_length
+/// [`AudioQuery::accent_phrases`]: ../rust_api/voicevox_core/struct.AudioQuery.html#structfield.accent_phrases
+/// [`AccentPhrase::moras`]: ../rust_api/voicevox_core/struct.AccentPhrase.html#structfield.moras
+/// [`Mora::consonant_length`]: ../rust_api/voicevox_core/struct.Mora.html#structfield.consonant_length
+/// [`Mora::vowel_length`]: ../rust_api/voicevox_core/struct.Mora.html#structfield.vowel_length
+/// [`AccentPhrase::is_interrogative`]: ../rust_api/voicevox_core/struct.AccentPhrase.html#structfield.is_interrogative
+/// [`Mora::pitch`]: ../rust_api/voicevox_core/struct.Mora.html#structfield.pitch
+/// [`AccentPhrase::pause_mora`]: ../rust_api/voicevox_core/struct.AccentPhrase.html#structfield.pause_mora
+/// [`AudioQuery::post_phoneme_length`]: ../rust_api/voicevox_core/struct.AudioQuery.html#structfield.post_phoneme_length
+/// [Rustの`f32::round_ties_even`]: https://doc.rust-lang.org/stable/std/primitive.f32.html#method.round_ties_even
+/// [`roundevenf(3)`]: https://en.cppreference.com/w/c/numeric/math/roundeven
+/// [`AudioQuery::speed_scale`]: ../rust_api/voicevox_core/struct.AudioQuery.html#structfield.speed_scale
+///
+/// @param [in] audio_query_json `AudioQuery`型のJSON
+/// @param [in] options オプション
+/// @param [out] output_frame_length 算出した総フレーム数の出力先
+///
+/// @returns 成功時には ::VOICEVOX_RESULT_OK 、失敗時には ::VOICEVOX_RESULT_INVALID_UTF8_INPUT_ERROR または ::VOICEVOX_RESULT_INVALID_AUDIO_QUERY_ERROR
+///
+/// \examples{
+/// ```c
+/// char *query = NULL;
+/// VoicevoxAudioFeature *audio = NULL;
+///
+/// VoicevoxResultCode voicevox_result = VOICEVOX_RESULT_OK;
+///
+/// #define TRY(result)                                                            \
+/// do {                                                                         \
+/// voicevox_result = result;                                                  \
+/// if (voicevox_result != VOICEVOX_RESULT_OK) {                               \
+/// goto cleanup;                                                            \
+/// }                                                                          \
+/// } while (0)
+/// ```
+///
+/// ```c
+/// TRY(voicevox_synthesizer_create_audio_query(
+/// synth, "こんにちは、音声合成の世界へようこそ？", WHATEVER_STYLE1,
+/// &query));
+///
+/// TRY(voicevox_synthesizer_create_audio_feature(
+/// synth, query, WHATEVER_STYLE2, voicevox_make_default_synthesis_options(),
+/// &audio));
+///
+/// size_t frame_length_of_audio_query;
+/// TRY(voicevox_audio_query_frame_length(
+/// query, voicevox_make_default_audio_query_frame_length_options(),
+/// &frame_length_of_audio_query));
+///
+/// const size_t frame_length_of_audio_feature = voicevox_audio_feature_len(audio);
+///
+/// assert(frame_length_of_audio_query == frame_length_of_audio_feature);
+/// ```
+///
+/// ```c
+/// size_t to_frame_length(float secs, float speed_scale) {
+/// const float kFrameRate = (float)VOICEVOX_FRAME_RATE;
+/// return roundevenf(roundevenf(secs * kFrameRate) / speed_scale);
+/// }
+///
+/// int main(void) {
+/// // …
+///
+/// // speed_scale         = 1.2f
+/// // pre_phoneme_length  = 3.3f
+/// // post_phoneme_length = 4.4f
+/// const char *kQuery = "{\n"
+/// "  \"accent_phrases\": [],\n"
+/// "  \"speedScale\": 1.2,\n"
+/// "  \"pitchScale\": 0.0,\n"
+/// "  \"intonationScale\": 1.0,\n"
+/// "  \"volumeScale\": 1.0,\n"
+/// "  \"prePhonemeLength\": 3.3,\n"
+/// "  \"postPhonemeLength\": 4.4,\n"
+/// "  \"outputSamplingRate\": 24000,\n"
+/// "  \"outputStereo\": false\n"
+/// "}\n";
+///
+/// size_t frame_length;
+/// TRY(voicevox_audio_query_frame_length(
+/// kQuery, voicevox_make_default_audio_query_frame_length_options(),
+/// &frame_length));
+///
+/// assert(frame_length ==
+/// // `speed_scale`, `pre_phoneme_length`
+/// to_frame_length(3.3f, 1.2f)
+/// // `speed_scale`, `consonant_length`, `vowel_length`,
+/// // `is_interrogative`
+/// + 0
+/// // `speed_scale`, `post_phoneme_length`
+/// + to_frame_length(4.4f, 1.2f));
+///
+/// // …
+/// }
+/// ```
+///
+/// ```c
+/// // speed_scale = FLT_MIN
+/// const char *kQuery = "{\n"
+/// "  \"accent_phrases\": [],\n"
+/// "  \"speedScale\": 1.1754943508222875e-38,\n"
+/// "  \"pitchScale\": 0.0,\n"
+/// "  \"intonationScale\": 1.0,\n"
+/// "  \"volumeScale\": 1.0,\n"
+/// "  \"prePhonemeLength\": 0.1,\n"
+/// "  \"postPhonemeLength\": 0.1,\n"
+/// "  \"outputSamplingRate\": 24000,\n"
+/// "  \"outputStereo\": false\n"
+/// "}\n";
+///
+/// size_t frame_length;
+/// TRY(voicevox_audio_query_frame_length(
+/// kQuery, voicevox_make_default_audio_query_frame_length_options(),
+/// &frame_length));
+///
+/// assert(frame_length == SIZE_MAX);
+/// ```
+/// }
+///
+/// \safety{
+/// - `audio_query_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `output_frame_length`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_audio_query_frame_length}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_audio_query_frame_length(const char *audio_query_json, struct VoicevoxAudioQueryFrameLengthOptions options, uintptr_t *output_frame_length)
+/// ```
+({int frameLength, int result}) voicevoxxAudioQueryFrameLength(
+  String audioQueryJson, {
+  VoicevoxxAudioQueryFrameLengthOptions? options,
+}) {
+  options ??= voicevoxxMakeDefaultAudioQueryFrameLengthOptions();
+  var frameLength = 0;
+  final optionsPointer = options.calloc();
+  final frameLengthPointer = ffi.calloc<UintPtr>();
+  final result = voicevoxAudioQueryFrameLength(
+    audioQueryJson,
+    optionsPointer.ref,
+    frameLengthPointer,
+  );
+  if (result == VOICEVOX_RESULT_OK) {
+    frameLength = frameLengthPointer.value;
+  }
+  ffi.calloc
+    ..free(optionsPointer)
+    ..free(frameLengthPointer);
+  return (result: result, frameLength: frameLength);
+}
+
+///
+/// signed 16-bit little endianのPCMデータからWAV形式のバイナリを生成する。
+///
+/// `pcm`がヌルならクラッシュする。
+///
+/// @param [in] pcm_length PCMデータのバイト長
+/// @param [in] pcm PCMデータ。非ヌル
+/// @param [in] sampling_rate サンプリングレート
+/// @param [in] is_stereo ステレオかどうか
+/// @param [out] output_wav_length 出力のバイト長
+/// @param [out] output_wav 出力先
+///
+/// \safety{
+/// - `pcm_length > 0`のとき、`pcm`は長さ`pcm_length`にわたって<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `output_wav_length`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// - `output_wav`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_wav_from_s16le}
+///
+/// ```c
+/// __declspec(dllimport) void voicevox_wav_from_s16le(uintptr_t pcm_length, const uint8_t *pcm, uint32_t sampling_rate, bool is_stereo, uintptr_t *output_wav_length, uint8_t **output_wav)
+/// ```
+Uint8List voicevoxxWavFromS16le(
+  Uint8List pcm,
+  int samplingRate, {
+  bool isStereo = true,
+}) {
+  Uint8List wav;
+  final pcmPointer = ffi.calloc<Uint8>(pcm.length);
+  pcmPointer.asTypedList(pcm.length).setAll(0, pcm);
+  final wavLengthPointer = ffi.calloc<UintPtr>();
+  final wavPointer = ffi.calloc<Pointer<Uint8>>();
+  voicevoxWavFromS16le(
+    pcm.length,
+    pcmPointer,
+    samplingRate,
+    isStereo,
+    wavLengthPointer,
+    wavPointer,
+  );
+  wav = Uint8List.fromList(
+    wavPointer.value.asTypedList(wavLengthPointer.value),
+  );
+  voicevoxBytesFree(wavPointer.value.cast<Uint8>());
+  ffi.calloc
+    ..free(pcmPointer)
+    ..free(wavLengthPointer)
+    ..free(wavPointer);
+  return wav;
 }
 
 ///
@@ -253,12 +500,12 @@ voicevoxxAudioQueryCreateFromAccentPhrases(String accentPhrasesJson) {
 ({Pointer<VoicevoxVoiceModelFile> model, int result})
 voicevoxxVoiceModelFileOpen(String path) {
   Pointer<VoicevoxVoiceModelFile> model = nullptr;
-  final modelPointer = calloc<Pointer<VoicevoxVoiceModelFile>>();
+  final modelPointer = ffi.calloc<Pointer<VoicevoxVoiceModelFile>>();
   final result = voicevoxVoiceModelFileOpen(path, modelPointer);
   if (result == VOICEVOX_RESULT_OK) {
     model = modelPointer.value;
   }
-  calloc.free(modelPointer);
+  ffi.calloc.free(modelPointer);
   return (result: result, model: model);
 }
 
@@ -278,17 +525,17 @@ voicevoxxVoiceModelFileOpen(String path) {
 /// __declspec(dllimport) void voicevox_voice_model_file_id(const struct VoicevoxVoiceModelFile *model, uint8_t (*output_voice_model_id)[16])
 /// ```
 Uint8List voicevoxxVoiceModelFileId(Pointer<VoicevoxVoiceModelFile> model) {
-  final fileIdPointer = calloc<Uint8>(16);
+  final fileIdPointer = ffi.calloc<Uint8>(16);
   voicevoxVoiceModelFileId(model, fileIdPointer);
   final result = Uint8List.fromList(fileIdPointer.asTypedList(16));
-  calloc.free(fileIdPointer);
+  ffi.calloc.free(fileIdPointer);
   return result;
 }
 
 ///
 /// ::VoicevoxVoiceModelFile からメタ情報を取得する。
 ///
-/// JSONの解放は ::voicevox_json_free で行う。
+/// JSONの解放は ::voicevox_string_free で行う。
 ///
 /// @param [in] model 音声モデル
 ///
@@ -303,8 +550,8 @@ String voicevoxxVoiceModelFileCreateMetasJson(
   Pointer<VoicevoxVoiceModelFile> model,
 ) {
   final json = voicevoxVoiceModelFileCreateMetasJson(model);
-  final result = json.cast<Utf8>().toDartString();
-  voicevoxJsonFree(json);
+  final result = json.cast<ffi.Utf8>().toDartString();
+  voicevoxStringFree(json);
   return result;
 }
 
@@ -337,7 +584,7 @@ voicevoxxSynthesizerNew(
   options ??= voicevoxxMakeDefaultInitializeOptions();
   Pointer<VoicevoxSynthesizer> synthesizer = nullptr;
   final optionsPointer = options.calloc();
-  final synthesizerPointer = calloc<Pointer<VoicevoxSynthesizer>>();
+  final synthesizerPointer = ffi.calloc<Pointer<VoicevoxSynthesizer>>();
   final result = voicevoxSynthesizerNew(
     onnxruntime,
     openJtalk,
@@ -347,7 +594,7 @@ voicevoxxSynthesizerNew(
   if (result == VOICEVOX_RESULT_OK) {
     synthesizer = synthesizerPointer.value;
   }
-  calloc
+  ffi.calloc
     ..free(optionsPointer)
     ..free(synthesizerPointer);
   return (result: result, synthesizer: synthesizer);
@@ -363,8 +610,9 @@ voicevoxxSynthesizerNew(
 /// __declspec(dllimport) struct VoicevoxLoadVoiceModelOptions voicevox_make_default_load_voice_model_options(void)
 /// ```
 VoicevoxxLoadVoiceModelOptions voicevoxxMakeDefaultLoadVoiceModelOptions() =>
-    VoicevoxxLoadVoiceModelOptions()
-      ..loadFromEntity(voicevoxMakeDefaultLoadVoiceModelOptions());
+    VoicevoxxLoadVoiceModelOptions.fromEntity(
+      voicevoxMakeDefaultLoadVoiceModelOptions(),
+    );
 
 ///
 /// 音声モデルを読み込む。
@@ -392,7 +640,7 @@ int voicevoxxSynthesizerLoadVoiceModel(
     model,
     optionsPointer.ref,
   );
-  calloc.free(optionsPointer);
+  ffi.calloc.free(optionsPointer);
   return result;
 }
 
@@ -423,7 +671,7 @@ int voicevoxxSynthesizerUnloadVoiceModel(
     synthesizer,
     modelIdPointer,
   );
-  calloc.free(modelIdPointer);
+  ffi.calloc.free(modelIdPointer);
   return result;
 }
 
@@ -454,14 +702,14 @@ bool voicevoxxSynthesizerIsLoadedVoiceModel(
     synthesizer,
     modelIdPointer,
   );
-  calloc.free(modelIdPointer);
+  ffi.calloc.free(modelIdPointer);
   return result;
 }
 
 ///
 /// 今読み込んでいる音声モデルのメタ情報を、JSONで取得する。
 ///
-/// JSONの解放は ::voicevox_json_free で行う。
+/// JSONの解放は ::voicevox_string_free で行う。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 ///
@@ -476,15 +724,15 @@ String voicevoxxSynthesizerCreateMetasJson(
   Pointer<VoicevoxSynthesizer> synthesizer,
 ) {
   final json = voicevoxSynthesizerCreateMetasJson(synthesizer);
-  final result = json.cast<Utf8>().toDartString();
-  voicevoxJsonFree(json);
+  final result = json.cast<ffi.Utf8>().toDartString();
+  voicevoxStringFree(json);
   return result;
 }
 
 ///
 /// ONNX Runtimeとして利用可能なデバイスの情報を、JSONで取得する。
 ///
-/// JSONの解放は ::voicevox_json_free で行う。
+/// JSONの解放は ::voicevox_string_free で行う。
 ///
 /// あくまでONNX Runtimeが対応しているデバイスの情報であることに注意。GPUが使える環境ではなかったとしても`cuda`や`dml`は`true`を示しうる。
 ///
@@ -515,25 +763,25 @@ voicevoxxOnnxruntimeCreateSupportedDevicesJson(
   Pointer<VoicevoxOnnxruntime> onnxruntime,
 ) {
   var supportedDeficesJson = '';
-  final supportedDevicesJsonPointer = calloc<Pointer<Int8>>();
+  final supportedDevicesJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxOnnxruntimeCreateSupportedDevicesJson(
     onnxruntime,
     supportedDevicesJsonPointer,
   );
   if (result == VOICEVOX_RESULT_OK) {
     supportedDeficesJson = supportedDevicesJsonPointer.value
-        .cast<Utf8>()
+        .cast<ffi.Utf8>()
         .toDartString();
-    voicevoxJsonFree(supportedDevicesJsonPointer.value);
+    voicevoxStringFree(supportedDevicesJsonPointer.value);
   }
-  calloc.free(supportedDevicesJsonPointer);
+  ffi.calloc.free(supportedDevicesJsonPointer);
   return (result: result, supportedDeficesJson: supportedDeficesJson);
 }
 
 ///
 /// AquesTalk風記法から、AudioQueryをJSONとして生成する。
 ///
-/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+/// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 /// @param [in] kana AquesTalk風記法
@@ -568,7 +816,7 @@ voicevoxxSynthesizerCreateAudioQueryFromKana(
   int styleId,
 ) {
   var audioQueryJson = '';
-  final autioQueryJsonPointer = calloc<Pointer<Int8>>();
+  final autioQueryJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxSynthesizerCreateAudioQueryFromKana(
     synthesizer,
     kana,
@@ -576,17 +824,19 @@ voicevoxxSynthesizerCreateAudioQueryFromKana(
     autioQueryJsonPointer,
   );
   if (result == VOICEVOX_RESULT_OK) {
-    audioQueryJson = autioQueryJsonPointer.value.cast<Utf8>().toDartString();
-    voicevoxJsonFree(autioQueryJsonPointer.value);
+    audioQueryJson = autioQueryJsonPointer.value
+        .cast<ffi.Utf8>()
+        .toDartString();
+    voicevoxStringFree(autioQueryJsonPointer.value);
   }
-  calloc.free(autioQueryJsonPointer);
+  ffi.calloc.free(autioQueryJsonPointer);
   return (audioQueryJson: audioQueryJson, result: result);
 }
 
 ///
 /// 日本語テキストから、AudioQueryをJSONとして生成する。
 ///
-/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+/// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
 ///
 /// ::voicevox_synthesizer_create_accent_phrases と ::voicevox_audio_query_create_from_accent_phrases
 /// が一体になったショートハンド。詳細は[テキスト音声合成の流れ]を参照。
@@ -625,7 +875,7 @@ voicevoxxSynthesizerCreateAudioQueryFromKana(
   int styleId,
 ) {
   var audioQueryJson = '';
-  final autioQueryJsonPointer = calloc<Pointer<Int8>>();
+  final autioQueryJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxSynthesizerCreateAudioQuery(
     synthesizer,
     text,
@@ -633,17 +883,19 @@ voicevoxxSynthesizerCreateAudioQueryFromKana(
     autioQueryJsonPointer,
   );
   if (result == VOICEVOX_RESULT_OK) {
-    audioQueryJson = autioQueryJsonPointer.value.cast<Utf8>().toDartString();
-    voicevoxJsonFree(autioQueryJsonPointer.value);
+    audioQueryJson = autioQueryJsonPointer.value
+        .cast<ffi.Utf8>()
+        .toDartString();
+    voicevoxStringFree(autioQueryJsonPointer.value);
   }
-  calloc.free(autioQueryJsonPointer);
+  ffi.calloc.free(autioQueryJsonPointer);
   return (audioQueryJson: audioQueryJson, result: result);
 }
 
 ///
 /// AquesTalk風記法から、AccentPhrase (アクセント句)の配列をJSON形式で生成する。
 ///
-/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+/// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 /// @param [in] kana AquesTalk風記法
@@ -679,7 +931,7 @@ voicevoxxSynthesizerCreateAccentPhrasesFromKana(
   int styleId,
 ) {
   var accentPhrasesJson = '';
-  final accentPhrasesJsonPointer = calloc<Pointer<Int8>>();
+  final accentPhrasesJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxSynthesizerCreateAccentPhrasesFromKana(
     synthesizer,
     kana,
@@ -688,18 +940,18 @@ voicevoxxSynthesizerCreateAccentPhrasesFromKana(
   );
   if (result == VOICEVOX_RESULT_OK) {
     accentPhrasesJson = accentPhrasesJsonPointer.value
-        .cast<Utf8>()
+        .cast<ffi.Utf8>()
         .toDartString();
-    voicevoxJsonFree(accentPhrasesJsonPointer.value);
+    voicevoxStringFree(accentPhrasesJsonPointer.value);
   }
-  calloc.free(accentPhrasesJsonPointer);
+  ffi.calloc.free(accentPhrasesJsonPointer);
   return (result: result, accentPhrasesJson: accentPhrasesJson);
 }
 
 ///
 /// 日本語テキストから、AccentPhrase (アクセント句)の配列をJSON形式で生成する。
 ///
-/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+/// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
 ///
 /// ::voicevox_open_jtalk_rc_analyze と ::voicevox_synthesizer_replace_mora_data
 /// が一体になったショートハンド。詳細は[テキスト音声合成の流れ]を参照。
@@ -739,7 +991,7 @@ voicevoxxSynthesizerCreateAccentPhrases(
   int styleId,
 ) {
   var accentPhrasesJson = '';
-  final accentPhrasesJsonPointer = calloc<Pointer<Int8>>();
+  final accentPhrasesJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxSynthesizerCreateAccentPhrases(
     synthesizer,
     text,
@@ -748,18 +1000,18 @@ voicevoxxSynthesizerCreateAccentPhrases(
   );
   if (result == VOICEVOX_RESULT_OK) {
     accentPhrasesJson = accentPhrasesJsonPointer.value
-        .cast<Utf8>()
+        .cast<ffi.Utf8>()
         .toDartString();
-    voicevoxJsonFree(accentPhrasesJsonPointer.value);
+    voicevoxStringFree(accentPhrasesJsonPointer.value);
   }
-  calloc.free(accentPhrasesJsonPointer);
+  ffi.calloc.free(accentPhrasesJsonPointer);
   return (result: result, accentPhrasesJson: accentPhrasesJson);
 }
 
 ///
 /// AccentPhraseの配列の音高・音素長を、特定の声で生成しなおす。
 ///
-/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+/// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
 ///
 /// ::voicevox_synthesizer_replace_phoneme_length と ::voicevox_synthesizer_replace_mora_pitch
 /// が一体になったショートハンド。詳細は[テキスト音声合成の流れ]を参照。
@@ -789,7 +1041,7 @@ voicevoxxSynthesizerCreateAccentPhrases(
   int styleId,
 ) {
   var outputAccentPhrasesJson = '';
-  final outputAccentPhrasesJsonPointer = calloc<Pointer<Int8>>();
+  final outputAccentPhrasesJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxSynthesizerReplaceMoraData(
     synthesizer,
     accentPhrasesJson,
@@ -798,18 +1050,18 @@ voicevoxxSynthesizerCreateAccentPhrases(
   );
   if (result == VOICEVOX_RESULT_OK) {
     outputAccentPhrasesJson = outputAccentPhrasesJsonPointer.value
-        .cast<Utf8>()
+        .cast<ffi.Utf8>()
         .toDartString();
-    voicevoxJsonFree(outputAccentPhrasesJsonPointer.value);
+    voicevoxStringFree(outputAccentPhrasesJsonPointer.value);
   }
-  calloc.free(outputAccentPhrasesJsonPointer);
+  ffi.calloc.free(outputAccentPhrasesJsonPointer);
   return (result: result, accentPhrasesJson: outputAccentPhrasesJson);
 }
 
 ///
 /// AccentPhraseの配列の音素長を、特定の声で生成しなおす。
 ///
-/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+/// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 /// @param [in] accent_phrases_json AccentPhraseの配列のJSON文字列
@@ -835,7 +1087,7 @@ voicevoxxSynthesizerReplacePhonemeLength(
   int styleId,
 ) {
   var outputAccentPhrasesJson = '';
-  final outputAccentPhrasesJsonPointer = calloc<Pointer<Int8>>();
+  final outputAccentPhrasesJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxSynthesizerReplacePhonemeLength(
     synthesizer,
     accentPhrasesJson,
@@ -844,18 +1096,18 @@ voicevoxxSynthesizerReplacePhonemeLength(
   );
   if (result == VOICEVOX_RESULT_OK) {
     outputAccentPhrasesJson = outputAccentPhrasesJsonPointer.value
-        .cast<Utf8>()
+        .cast<ffi.Utf8>()
         .toDartString();
-    voicevoxJsonFree(outputAccentPhrasesJsonPointer.value);
+    voicevoxStringFree(outputAccentPhrasesJsonPointer.value);
   }
-  calloc.free(outputAccentPhrasesJsonPointer);
+  ffi.calloc.free(outputAccentPhrasesJsonPointer);
   return (result: result, accentPhrasesJson: outputAccentPhrasesJson);
 }
 
 ///
 /// AccentPhraseの配列の音高を、特定の声で生成しなおす。
 ///
-/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+/// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 /// @param [in] accent_phrases_json AccentPhraseの配列のJSON文字列
@@ -880,7 +1132,7 @@ voicevoxxSynthesizerReplacePhonemeLength(
   int styleId,
 ) {
   var outputAccentPhrasesJson = '';
-  final outputAccentPhrasesJsonPointer = calloc<Pointer<Int8>>();
+  final outputAccentPhrasesJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxSynthesizerReplaceMoraPitch(
     synthesizer,
     accentPhrasesJson,
@@ -889,11 +1141,11 @@ voicevoxxSynthesizerReplacePhonemeLength(
   );
   if (result == VOICEVOX_RESULT_OK) {
     outputAccentPhrasesJson = outputAccentPhrasesJsonPointer.value
-        .cast<Utf8>()
+        .cast<ffi.Utf8>()
         .toDartString();
-    voicevoxJsonFree(outputAccentPhrasesJsonPointer.value);
+    voicevoxStringFree(outputAccentPhrasesJsonPointer.value);
   }
-  calloc.free(outputAccentPhrasesJsonPointer);
+  ffi.calloc.free(outputAccentPhrasesJsonPointer);
   return (result: result, accentPhrasesJson: outputAccentPhrasesJson);
 }
 
@@ -907,13 +1159,12 @@ voicevoxxSynthesizerReplacePhonemeLength(
 /// __declspec(dllimport) struct VoicevoxSynthesisOptions voicevox_make_default_synthesis_options(void)
 /// ```
 VoicevoxxSynthesisOptions voicevoxxMakeDefaultSynthesisOptions() =>
-    VoicevoxxSynthesisOptions()
-      ..loadFromEntity(voicevoxMakeDefaultSynthesisOptions());
+    VoicevoxxSynthesisOptions.fromEntity(voicevoxMakeDefaultSynthesisOptions());
 
 ///
 /// AudioQueryから音声合成を行う。
 ///
-/// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
+/// 生成したWAVデータを解放するには ::voicevox_bytes_free を使う。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 /// @param [in] audio_query_json AudioQueryのJSON文字列
@@ -942,10 +1193,10 @@ VoicevoxxSynthesisOptions voicevoxxMakeDefaultSynthesisOptions() =>
   VoicevoxxSynthesisOptions? options,
 }) {
   options ??= voicevoxxMakeDefaultSynthesisOptions();
-  late Uint8List wav;
+  Uint8List wav;
   final optionsPointer = options.calloc();
-  final wavLengthPointer = calloc<UintPtr>();
-  final wavPointer = calloc<Pointer<Uint8>>();
+  final wavLengthPointer = ffi.calloc<UintPtr>();
+  final wavPointer = ffi.calloc<Pointer<Uint8>>();
   final result = voicevoxSynthesizerSynthesis(
     synthesizer,
     audioQueryJson,
@@ -958,15 +1209,334 @@ VoicevoxxSynthesisOptions voicevoxxMakeDefaultSynthesisOptions() =>
     wav = Uint8List.fromList(
       wavPointer.value.asTypedList(wavLengthPointer.value),
     );
-    voicevoxWavFree(wavPointer.value);
+    voicevoxBytesFree(wavPointer.value.cast<Uint8>());
   } else {
     wav = Uint8List(0);
   }
-  calloc
+  ffi.calloc
     ..free(optionsPointer)
     ..free(wavLengthPointer)
     ..free(wavPointer);
   return (result: result, wav: wav);
+}
+
+///
+/// AudioQueryから音声合成用の中間表現を<b>構築</b>(_construct_)する。
+///
+/// 生成した中間表現を解放するには ::voicevox_audio_feature_delete を使う。
+///
+/// > [!WARNING]
+/// > ストリーミング音声合成にはいくつか注意事項がある。ユーザーガイドの[ストリーミング音声合成]を参照。
+///
+/// [ストリーミング音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/usage.md#ストリーミング音声合成
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] audio_query_json AudioQueryのJSON文字列
+/// @param [in] style_id スタイルID
+/// @param [in] options オプション
+/// @param [out] out_audio_feature 構築先
+///
+/// @returns 結果コード
+///
+/// \safety{
+/// - `audio_query_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+/// - `out_audio_feature`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_synthesizer_create_audio_feature}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_create_audio_feature(const struct VoicevoxSynthesizer *synthesizer, const char *audio_query_json, VoicevoxStyleId style_id, struct VoicevoxSynthesisOptions options, struct VoicevoxAudioFeature **out_audio_feature)
+/// ```
+({int result, Pointer<VoicevoxAudioFeature> audioFeature})
+voicevoxxSynthesizerCreateAudioFeature(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  String audioQueryJson,
+  int styleId, {
+  VoicevoxxSynthesisOptions? options,
+}) {
+  options ??= voicevoxxMakeDefaultSynthesisOptions();
+  final optionsPointer = options.calloc();
+  Pointer<VoicevoxAudioFeature> audioFeature = nullptr;
+  final audioFeaturePointer = ffi.calloc<Pointer<VoicevoxAudioFeature>>();
+  final result = voicevoxSynthesizerCreateAudioFeature(
+    synthesizer,
+    audioQueryJson,
+    styleId,
+    optionsPointer.ref,
+    audioFeaturePointer,
+  );
+  if (result == VOICEVOX_RESULT_OK) {
+    audioFeature = audioFeaturePointer.value;
+  }
+  ffi.calloc.free(optionsPointer);
+  ffi.calloc.free(audioFeaturePointer);
+  return (result: result, audioFeature: audioFeature);
+}
+
+///
+/// 指定された範囲に対応した ::VoicevoxAudioFeatureSlice を返す。
+///
+/// `audio_feature`は複製されずにそのまま構造体に入る。解放は不要。
+///
+/// @param [in] audio_feature
+/// @param [in] start_inclusive 開始フレーム番号
+/// @param [in] end 終了フレーム番号
+/// @param [in] end_is_inclusive `end`を含むかどうか
+/// @param [in] clamp
+/// @param [in] allow_start_exceeds_end
+/// @param [out] output スライスの出力先
+///
+/// @returns 結果コード。エラーは
+/// \ref VOICEVOX_RESULT_START_OUT_OF_BOUNDS_ERROR
+/// 、\ref VOICEVOX_RESULT_END_OUT_OF_BOUNDS_ERROR
+/// 、または \ref VOICEVOX_RESULT_START_EXCEEDS_END_ERROR
+///
+/// \safety{
+/// - `output`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_audio_feature_slice}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_audio_feature_slice(const struct VoicevoxAudioFeature *audio_feature, uintptr_t start_inclusive, uintptr_t end, bool end_is_inclusive, bool clamp, bool allow_start_exceeds_end, struct VoicevoxAudioFeatureSlice *output)
+/// ```
+({int result, VoicevoxxAudioFeatureSlice slice}) voicevoxxAudioFeatureSlice(
+  Pointer<VoicevoxAudioFeature> audioFeature,
+  int startInclusive,
+  int end, {
+  bool endIsInclusive = false,
+  bool clamp = false,
+  bool allowStartExceedsEnd = false,
+}) {
+  VoicevoxxAudioFeatureSlice slice;
+  final slicePointer = ffi.calloc<VoicevoxAudioFeatureSlice>();
+  final result = voicevoxAudioFeatureSlice(
+    audioFeature,
+    startInclusive,
+    end,
+    endIsInclusive,
+    clamp,
+    allowStartExceedsEnd,
+    slicePointer,
+  );
+  if (result == VOICEVOX_RESULT_OK) {
+    slice = VoicevoxxAudioFeatureSlice.fromPointer(slicePointer);
+  } else {
+    slice = VoicevoxxAudioFeatureSlice();
+  }
+  ffi.calloc.free(slicePointer);
+  return (result: result, slice: slice);
+}
+
+///
+/// 与えられた ::VoicevoxAudioFeature の全体を表す ::VoicevoxAudioFeatureSlice を返す。
+///
+/// `audio_feature`は複製されずにそのまま構造体に入る。解放は不要。
+///
+/// \orig-impl{voicevox_audio_feature_slice_new}
+///
+/// ```c
+/// __declspec(dllimport) struct VoicevoxAudioFeatureSlice voicevox_audio_feature_slice_new(const struct VoicevoxAudioFeature *audio_feature, bool clamp, bool allow_start_exceeds_end)
+/// ```
+VoicevoxxAudioFeatureSlice voicevoxxAudioFeatureSliceNew(
+  Pointer<VoicevoxAudioFeature> audioFeature, {
+  bool clamp = false,
+  bool allowStartExceedsEnd = false,
+}) {
+  final entity = voicevoxAudioFeatureSliceNew(
+    audioFeature,
+    clamp,
+    allowStartExceedsEnd,
+  );
+  return VoicevoxxAudioFeatureSlice.fromEntity(entity);
+}
+
+///
+/// ::VoicevoxAudioFeatureSlice が持つフレーム数を返す。
+///
+/// @param [in] audio_feature_slice
+/// @param [out] output フレーム数の出力先
+///
+/// @returns 結果コード。エラーは
+/// \ref VOICEVOX_RESULT_START_OUT_OF_BOUNDS_ERROR
+/// 、\ref VOICEVOX_RESULT_END_OUT_OF_BOUNDS_ERROR
+/// 、または \ref VOICEVOX_RESULT_START_EXCEEDS_END_ERROR
+///
+/// \safety{
+/// - `output`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_audio_feature_slice_len}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_audio_feature_slice_len(struct VoicevoxAudioFeatureSlice audio_feature_slice, uintptr_t *output)
+/// ```
+({int result, int len}) voicevoxxAudioFeatureSliceLen(
+  VoicevoxxAudioFeatureSlice audioFeatureSlice,
+) {
+  var len = 0;
+  final audioFutureSlicePointer = audioFeatureSlice.calloc();
+  final lenPointer = ffi.calloc<UintPtr>();
+  final result = voicevoxAudioFeatureSliceLen(
+    audioFutureSlicePointer.ref,
+    lenPointer,
+  );
+  if (result == VOICEVOX_RESULT_OK) {
+    len = lenPointer.value;
+  }
+  ffi.calloc.free(audioFutureSlicePointer);
+  ffi.calloc.free(lenPointer);
+  return (result: result, len: len);
+}
+
+///
+/// ::voicevox_audio_feature_slice_len で取得する長さが`0`かどうかを返す。
+///
+/// @param [in] audio_feature_slice
+/// @param [out] output 長さが`0`かどうかの出力先
+///
+/// @returns 結果コード。エラーは
+/// \ref VOICEVOX_RESULT_START_OUT_OF_BOUNDS_ERROR
+/// 、\ref VOICEVOX_RESULT_END_OUT_OF_BOUNDS_ERROR
+/// 、または \ref VOICEVOX_RESULT_START_EXCEEDS_END_ERROR
+///
+/// \safety{
+/// - `output`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_audio_feature_slice_is_empty}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_audio_feature_slice_is_empty(struct VoicevoxAudioFeatureSlice audio_feature_slice, bool *output)
+/// ```
+({int result, bool isEmpty}) voicevoxxAudioFeatureSliceIsEmpty(
+  VoicevoxxAudioFeatureSlice audioFeatureSlice,
+) {
+  var isEmpty = false;
+  final audioFutureSlicePointer = audioFeatureSlice.calloc();
+  final isEmptyPointer = ffi.calloc<Bool>();
+  final result = voicevoxAudioFeatureSliceIsEmpty(
+    audioFutureSlicePointer.ref,
+    isEmptyPointer,
+  );
+  if (result == VOICEVOX_RESULT_OK) {
+    isEmpty = isEmptyPointer.value;
+  }
+  ffi.calloc.free(audioFutureSlicePointer);
+  ffi.calloc.free(isEmptyPointer);
+  return (result: result, isEmpty: isEmpty);
+}
+
+///
+/// 与えられた ::VoicevoxAudioFeatureSlice のサブスライスを返す。
+///
+/// `audio_feature_slice.audio_feature`は複製されずにそのまま構造体に入る。解放は不要。
+///
+/// @param [in] audio_feature_slice
+/// @param [in] start_inclusive 開始フレーム番号
+/// @param [in] end 終了フレーム番号
+/// @param [in] end_is_inclusive `end`を含むかどうか
+/// @param [in] clamp
+/// @param [in] allow_start_exceeds_end
+/// @param [out] output サブスライスの出力先
+///
+/// @returns 結果コード。エラーは
+/// \ref VOICEVOX_RESULT_START_OUT_OF_BOUNDS_ERROR
+/// 、\ref VOICEVOX_RESULT_END_OUT_OF_BOUNDS_ERROR
+/// 、または \ref VOICEVOX_RESULT_START_EXCEEDS_END_ERROR
+///
+/// \safety{
+/// - `output`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_audio_feature_slice_slice}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_audio_feature_slice_slice(struct VoicevoxAudioFeatureSlice audio_feature_slice, uintptr_t start_inclusive, uintptr_t end, bool end_is_inclusive, bool clamp, bool allow_start_exceeds_end, struct VoicevoxAudioFeatureSlice *output)
+/// ```
+({int result, VoicevoxxAudioFeatureSlice slice})
+voicevoxxAudioFeatureSliceSlice(
+  VoicevoxxAudioFeatureSlice audioFeatureSlice,
+  int startInclusive,
+  int end, {
+  bool endIsInclusive = false,
+  bool clamp = false,
+  bool allowStartExceedsEnd = false,
+}) {
+  VoicevoxxAudioFeatureSlice slice;
+  final audioFeatureSlicePointer = audioFeatureSlice.calloc();
+  final slicePointer = ffi.calloc<VoicevoxAudioFeatureSlice>();
+  final result = voicevoxAudioFeatureSliceSlice(
+    audioFeatureSlicePointer.ref,
+    startInclusive,
+    end,
+    endIsInclusive,
+    clamp,
+    allowStartExceedsEnd,
+    slicePointer,
+  );
+  if (result == VOICEVOX_RESULT_OK) {
+    slice = VoicevoxxAudioFeatureSlice.fromPointer(slicePointer);
+  } else {
+    slice = VoicevoxxAudioFeatureSlice();
+  }
+  ffi.calloc.free(audioFeatureSlicePointer);
+  ffi.calloc.free(slicePointer);
+  return (result: result, slice: slice);
+}
+
+///
+/// ::VoicevoxAudioFeatureSlice から、16bit PCMで音声波形を生成する。
+///
+/// 生成されたPCMデータが`0`バイトのとき、`output_pcm_length`には`0`が、`output_pcm`には ::voicevox_empty_bytes が書き込まれる。
+///
+/// 生成した`1`バイト以上のPCMデータを解放するには ::voicevox_bytes_free を使う。
+///
+/// @param [in] synthesizer 音声シンセサイザ
+/// @param [in] audio_feature_slice 音声合成用の中間表現
+/// @param [out] output_pcm_length 出力のバイト長
+/// @param [out] output_pcm 出力先
+///
+/// @returns 結果コード
+///
+/// \safety{
+/// - `output_pcm_length`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// - `output_pcm`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+/// }
+///
+/// \orig-impl{voicevox_synthesizer_render}
+///
+/// ```c
+/// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_render(const struct VoicevoxSynthesizer *synthesizer, struct VoicevoxAudioFeatureSlice audio_feature_slice, uintptr_t *output_pcm_length, uint8_t **output_pcm)
+/// ```
+({int result, Uint8List pcm}) voicevoxxSynthesizerRender(
+  Pointer<VoicevoxSynthesizer> synthesizer,
+  VoicevoxxAudioFeatureSlice audioFeatureSlice,
+) {
+  Uint8List pcm;
+  final audioFeatureSlicePointer = audioFeatureSlice.calloc();
+  final pcmLengthPointer = ffi.calloc<UintPtr>();
+  final pcmPointer = ffi.calloc<Pointer<Uint8>>();
+  final result = voicevoxSynthesizerRender(
+    synthesizer,
+    audioFeatureSlicePointer.ref,
+    pcmLengthPointer,
+    pcmPointer,
+  );
+  if (result == VOICEVOX_RESULT_OK) {
+    pcm = Uint8List.fromList(
+      pcmPointer.value.asTypedList(pcmLengthPointer.value),
+    );
+    voicevoxBytesFree(pcmPointer.value.cast<Uint8>());
+  } else {
+    pcm = Uint8List(0);
+  }
+  ffi.calloc
+    ..free(audioFeatureSlicePointer)
+    ..free(pcmLengthPointer)
+    ..free(pcmPointer);
+  return (result: result, pcm: pcm);
 }
 
 ///
@@ -979,12 +1549,12 @@ VoicevoxxSynthesisOptions voicevoxxMakeDefaultSynthesisOptions() =>
 /// __declspec(dllimport) struct VoicevoxTtsOptions voicevox_make_default_tts_options(void)
 /// ```
 VoicevoxxTtsOptions voicevoxxMakeDefaultTtsOptions() =>
-    VoicevoxxTtsOptions()..loadFromEntity(voicevoxMakeDefaultTtsOptions());
+    VoicevoxxTtsOptions.fromEntity(voicevoxMakeDefaultTtsOptions());
 
 ///
 /// AquesTalk風記法から音声合成を行う。
 ///
-/// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
+/// 生成したWAVデータを解放するには ::voicevox_bytes_free を使う。
 ///
 /// @param [in] synthesizer
 /// @param [in] kana AquesTalk風記法
@@ -1013,10 +1583,10 @@ VoicevoxxTtsOptions voicevoxxMakeDefaultTtsOptions() =>
   VoicevoxxTtsOptions? options,
 }) {
   options ??= voicevoxxMakeDefaultTtsOptions();
-  late Uint8List wav;
+  Uint8List wav;
   final optionsPointer = options.calloc();
-  final wavLengthPointer = calloc<UintPtr>();
-  final wavPointer = calloc<Pointer<Uint8>>();
+  final wavLengthPointer = ffi.calloc<UintPtr>();
+  final wavPointer = ffi.calloc<Pointer<Uint8>>();
   final result = voicevoxSynthesizerTtsFromKana(
     synthesizer,
     kana,
@@ -1029,11 +1599,11 @@ VoicevoxxTtsOptions voicevoxxMakeDefaultTtsOptions() =>
     wav = Uint8List.fromList(
       wavPointer.value.asTypedList(wavLengthPointer.value),
     );
-    voicevoxWavFree(wavPointer.value);
+    voicevoxBytesFree(wavPointer.value.cast<Uint8>());
   } else {
     wav = Uint8List(0);
   }
-  calloc
+  ffi.calloc
     ..free(optionsPointer)
     ..free(wavLengthPointer)
     ..free(wavPointer);
@@ -1043,7 +1613,7 @@ VoicevoxxTtsOptions voicevoxxMakeDefaultTtsOptions() =>
 ///
 /// 日本語テキストから音声合成を行う。
 ///
-/// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
+/// 生成したWAVデータを解放するには ::voicevox_bytes_free を使う。
 ///
 /// ::voicevox_synthesizer_create_audio_query と ::voicevox_synthesizer_synthesis
 /// が一体になったショートハンド。詳細は[テキスト音声合成の流れ]を参照。
@@ -1077,10 +1647,10 @@ VoicevoxxTtsOptions voicevoxxMakeDefaultTtsOptions() =>
   VoicevoxxTtsOptions? options,
 }) {
   options ??= voicevoxxMakeDefaultTtsOptions();
-  late Uint8List wav;
+  Uint8List wav;
   final optionsPointer = options.calloc();
-  final wavLengthPointer = calloc<UintPtr>();
-  final wavPointer = calloc<Pointer<Uint8>>();
+  final wavLengthPointer = ffi.calloc<UintPtr>();
+  final wavPointer = ffi.calloc<Pointer<Uint8>>();
   final result = voicevoxSynthesizerTts(
     synthesizer,
     text,
@@ -1093,11 +1663,11 @@ VoicevoxxTtsOptions voicevoxxMakeDefaultTtsOptions() =>
     wav = Uint8List.fromList(
       wavPointer.value.asTypedList(wavLengthPointer.value),
     );
-    voicevoxWavFree(wavPointer.value);
+    voicevoxBytesFree(wavPointer.value.cast<Uint8>());
   } else {
     wav = Uint8List(0);
   }
-  calloc
+  ffi.calloc
     ..free(optionsPointer)
     ..free(wavLengthPointer)
     ..free(wavPointer);
@@ -1111,7 +1681,7 @@ VoicevoxxTtsOptions voicevoxxMakeDefaultTtsOptions() =>
 ///
 /// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
 ///
-/// 生成したJSONを解放するには ::voicevox_json_free を使う。
+/// 生成したJSONを解放するには ::voicevox_string_free を使う。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 /// @param [in] score_json [`Score`型]を表すJSON
@@ -1160,7 +1730,7 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
   int styleId,
 ) {
   var frameAudioQueryJson = '';
-  final frameAudioQueryJsonPointer = calloc<Pointer<Int8>>();
+  final frameAudioQueryJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxSynthesizerCreateSingFrameAudioQuery(
     synthesizer,
     scoreJson,
@@ -1169,11 +1739,11 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
   );
   if (result == VOICEVOX_RESULT_OK) {
     frameAudioQueryJson = frameAudioQueryJsonPointer.value
-        .cast<Utf8>()
+        .cast<ffi.Utf8>()
         .toDartString();
-    voicevoxJsonFree(frameAudioQueryJsonPointer.value);
+    voicevoxStringFree(frameAudioQueryJsonPointer.value);
   }
-  calloc.free(frameAudioQueryJsonPointer);
+  ffi.calloc.free(frameAudioQueryJsonPointer);
   return (result: result, frameAudioQueryJson: frameAudioQueryJson);
 }
 
@@ -1184,7 +1754,7 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
 ///
 /// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
 ///
-/// 生成したJSONを解放するには ::voicevox_json_free を使う。
+/// 生成したJSONを解放するには ::voicevox_string_free を使う。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 /// @param [in] score_json [`Score`型]を表すJSON
@@ -1214,7 +1784,7 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
   int styleId,
 ) {
   var f0Json = '';
-  final f0JsonPointer = calloc<Pointer<Int8>>();
+  final f0JsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxSynthesizerCreateSingFrameF0(
     synthesizer,
     scoreJson,
@@ -1223,10 +1793,10 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
     f0JsonPointer,
   );
   if (result == VOICEVOX_RESULT_OK) {
-    f0Json = f0JsonPointer.value.cast<Utf8>().toDartString();
-    voicevoxJsonFree(f0JsonPointer.value);
+    f0Json = f0JsonPointer.value.cast<ffi.Utf8>().toDartString();
+    voicevoxStringFree(f0JsonPointer.value);
   }
-  calloc.free(f0JsonPointer);
+  ffi.calloc.free(f0JsonPointer);
   return (result: result, f0Json: f0Json);
 }
 
@@ -1237,7 +1807,7 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
 ///
 /// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
 ///
-/// 生成したJSONを解放するには ::voicevox_json_free を使う。
+/// 生成したJSONを解放するには ::voicevox_string_free を使う。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 /// @param [in] score_json [`Score`型]を表すJSON
@@ -1267,7 +1837,7 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
   int styleId,
 ) {
   var volumeJson = '';
-  final volumeJsonPointer = calloc<Pointer<Int8>>();
+  final volumeJsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxSynthesizerCreateSingFrameVolume(
     synthesizer,
     scoreJson,
@@ -1276,10 +1846,10 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
     volumeJsonPointer,
   );
   if (result == VOICEVOX_RESULT_OK) {
-    volumeJson = volumeJsonPointer.value.cast<Utf8>().toDartString();
-    voicevoxJsonFree(volumeJsonPointer.value);
+    volumeJson = volumeJsonPointer.value.cast<ffi.Utf8>().toDartString();
+    voicevoxStringFree(volumeJsonPointer.value);
   }
-  calloc.free(volumeJsonPointer);
+  ffi.calloc.free(volumeJsonPointer);
   return (result: result, volumeJson: volumeJson);
 }
 
@@ -1290,7 +1860,7 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
 ///
 /// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
 ///
-/// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
+/// 生成したWAVデータを解放するには ::voicevox_bytes_free を使う。
 ///
 /// @param [in] synthesizer 音声シンセサイザ
 /// @param [in] frame_audio_query_json [`FrameAudioQuery`型]を表すJSON
@@ -1329,9 +1899,9 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
   String frameAudioQueryJson,
   int styleId,
 ) {
-  late Uint8List wav;
-  final wavLengthPointer = calloc<UintPtr>();
-  final wavPointer = calloc<Pointer<Uint8>>();
+  Uint8List wav;
+  final wavLengthPointer = ffi.calloc<UintPtr>();
+  final wavPointer = ffi.calloc<Pointer<Uint8>>();
   final result = voicevoxSynthesizerFrameSynthesis(
     synthesizer,
     frameAudioQueryJson,
@@ -1343,11 +1913,11 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
     wav = Uint8List.fromList(
       wavPointer.value.asTypedList(wavLengthPointer.value),
     );
-    voicevoxWavFree(wavPointer.value);
+    voicevoxBytesFree(wavPointer.value.cast<Uint8>());
   } else {
     wav = Uint8List(0);
   }
-  calloc
+  ffi.calloc
     ..free(wavLengthPointer)
     ..free(wavPointer);
   return (result: result, wav: wav);
@@ -1379,14 +1949,14 @@ voicevoxxSynthesizerCreateSingFrameAudioQuery(
   VoicevoxxUserDictWord word,
 ) {
   final wordPointer = word.calloc();
-  final wordUuidPointer = calloc<Uint8>(16);
+  final wordUuidPointer = ffi.calloc<Uint8>(16);
   final result = voicevoxUserDictAddWord(
     userDict,
     wordPointer,
     wordUuidPointer,
   );
   final wordUuid = Uint8List.fromList(wordUuidPointer.asTypedList(16));
-  calloc.free(wordUuidPointer);
+  ffi.calloc.free(wordUuidPointer);
   wordPointer.callocAllFree();
   return (result: result, wordUuid: wordUuid);
 }
@@ -1414,7 +1984,7 @@ int voicevoxxUserDictUpdateWord(
   Uint8List wordUuid,
   VoicevoxxUserDictWord word,
 ) {
-  final wordUuidPointer = calloc<Uint8>(16);
+  final wordUuidPointer = ffi.calloc<Uint8>(16);
   final wordPointer = word.calloc();
   wordUuidPointer.asTypedList(16).setAll(0, wordUuid);
   final result = voicevoxUserDictUpdateWord(
@@ -1422,7 +1992,7 @@ int voicevoxxUserDictUpdateWord(
     wordUuidPointer,
     wordPointer,
   );
-  calloc.free(wordUuidPointer);
+  ffi.calloc.free(wordUuidPointer);
   wordPointer.callocAllFree();
   return result;
 }
@@ -1447,17 +2017,17 @@ int voicevoxxUserDictRemoveWord(
   Pointer<VoicevoxUserDict> userDict,
   Uint8List wordUuid,
 ) {
-  final wordUuidPointer = calloc<Uint8>(16);
+  final wordUuidPointer = ffi.calloc<Uint8>(16);
   wordUuidPointer.asTypedList(16).setAll(0, wordUuid);
   final result = voicevoxUserDictRemoveWord(userDict, wordUuidPointer);
-  calloc.free(wordUuidPointer);
+  ffi.calloc.free(wordUuidPointer);
   return result;
 }
 
 ///
 /// ユーザー辞書の単語をJSON形式で出力する。
 ///
-/// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+/// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
 ///
 /// @param [in] user_dict ユーザー辞書
 /// @param [out] output_json 出力先
@@ -1476,12 +2046,12 @@ int voicevoxxUserDictRemoveWord(
   Pointer<VoicevoxUserDict> userDict,
 ) {
   var json = '';
-  final jsonPointer = calloc<Pointer<Int8>>();
+  final jsonPointer = ffi.calloc<Pointer<Int8>>();
   final result = voicevoxUserDictToJson(userDict, jsonPointer);
   if (result == VOICEVOX_RESULT_OK) {
-    json = jsonPointer.value.cast<Utf8>().toDartString();
-    voicevoxJsonFree(jsonPointer.value);
+    json = jsonPointer.value.cast<ffi.Utf8>().toDartString();
+    voicevoxStringFree(jsonPointer.value);
   }
-  calloc.free(jsonPointer);
+  ffi.calloc.free(jsonPointer);
   return (result: result, json: json);
 }

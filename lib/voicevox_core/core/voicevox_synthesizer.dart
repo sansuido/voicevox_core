@@ -150,7 +150,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// 今読み込んでいる音声モデルのメタ情報を、JSONで取得する。
   ///
-  /// JSONの解放は ::voicevox_json_free で行う。
+  /// JSONの解放は ::voicevox_string_free で行う。
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   ///
@@ -166,7 +166,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// AquesTalk風記法から、AudioQueryをJSONとして生成する。
   ///
-  /// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+  /// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   /// @param [in] kana AquesTalk風記法
@@ -202,7 +202,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// 日本語テキストから、AudioQueryをJSONとして生成する。
   ///
-  /// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+  /// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
   ///
   /// ::voicevox_synthesizer_create_accent_phrases と ::voicevox_audio_query_create_from_accent_phrases
   /// が一体になったショートハンド。詳細は[テキスト音声合成の流れ]を参照。
@@ -243,7 +243,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// AquesTalk風記法から、AccentPhrase (アクセント句)の配列をJSON形式で生成する。
   ///
-  /// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+  /// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   /// @param [in] kana AquesTalk風記法
@@ -280,7 +280,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// 日本語テキストから、AccentPhrase (アクセント句)の配列をJSON形式で生成する。
   ///
-  /// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+  /// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
   ///
   /// ::voicevox_open_jtalk_rc_analyze と ::voicevox_synthesizer_replace_mora_data
   /// が一体になったショートハンド。詳細は[テキスト音声合成の流れ]を参照。
@@ -321,7 +321,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// AccentPhraseの配列の音高・音素長を、特定の声で生成しなおす。
   ///
-  /// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+  /// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
   ///
   /// ::voicevox_synthesizer_replace_phoneme_length と ::voicevox_synthesizer_replace_mora_pitch
   /// が一体になったショートハンド。詳細は[テキスト音声合成の流れ]を参照。
@@ -353,7 +353,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// AccentPhraseの配列の音素長を、特定の声で生成しなおす。
   ///
-  /// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+  /// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   /// @param [in] accent_phrases_json AccentPhraseの配列のJSON文字列
@@ -384,7 +384,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// AccentPhraseの配列の音高を、特定の声で生成しなおす。
   ///
-  /// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+  /// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   /// @param [in] accent_phrases_json AccentPhraseの配列のJSON文字列
@@ -411,7 +411,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// AudioQueryから音声合成を行う。
   ///
-  /// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
+  /// 生成したWAVデータを解放するには ::voicevox_bytes_free を使う。
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   /// @param [in] audio_query_json AudioQueryのJSON文字列
@@ -445,9 +445,76 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   );
 
   ///
+  /// AudioQueryから音声合成用の中間表現を<b>構築</b>(_construct_)する。
+  ///
+  /// 生成した中間表現を解放するには ::voicevox_audio_feature_delete を使う。
+  ///
+  /// > [!WARNING]
+  /// > ストリーミング音声合成にはいくつか注意事項がある。ユーザーガイドの[ストリーミング音声合成]を参照。
+  ///
+  /// [ストリーミング音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/usage.md#ストリーミング音声合成
+  ///
+  /// @param [in] synthesizer 音声シンセサイザ
+  /// @param [in] audio_query_json AudioQueryのJSON文字列
+  /// @param [in] style_id スタイルID
+  /// @param [in] options オプション
+  /// @param [out] out_audio_feature 構築先
+  ///
+  /// @returns 結果コード
+  ///
+  /// \safety{
+  /// - `audio_query_json`はヌル終端文字列を指し、かつ<a href="#voicevox-core-safety">読み込みについて有効</a>でなければならない。
+  /// - `out_audio_feature`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+  /// }
+  ///
+  /// \orig-impl{voicevox_synthesizer_create_audio_feature}
+  ///
+  /// ```c
+  /// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_create_audio_feature(const struct VoicevoxSynthesizer *synthesizer, const char *audio_query_json, VoicevoxStyleId style_id, struct VoicevoxSynthesisOptions options, struct VoicevoxAudioFeature **out_audio_feature)
+  /// ```
+  ({int result, Pointer<VoicevoxAudioFeature> audioFeature}) createAudioFeature(
+    String audioQueryJson,
+    int styleId, {
+    VoicevoxxSynthesisOptions? options,
+  }) => voicevoxxSynthesizerCreateAudioFeature(
+    this,
+    audioQueryJson,
+    styleId,
+    options: options,
+  );
+
+  ///
+  /// ::VoicevoxAudioFeatureSlice から、16bit PCMで音声波形を生成する。
+  ///
+  /// 生成されたPCMデータが`0`バイトのとき、`output_pcm_length`には`0`が、`output_pcm`には ::voicevox_empty_bytes が書き込まれる。
+  ///
+  /// 生成した`1`バイト以上のPCMデータを解放するには ::voicevox_bytes_free を使う。
+  ///
+  /// @param [in] synthesizer 音声シンセサイザ
+  /// @param [in] audio_feature_slice 音声合成用の中間表現
+  /// @param [out] output_pcm_length 出力のバイト長
+  /// @param [out] output_pcm 出力先
+  ///
+  /// @returns 結果コード
+  ///
+  /// \safety{
+  /// - `output_pcm_length`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+  /// - `output_pcm`は<a href="#voicevox-core-safety">書き込みについて有効</a>でなければならない。
+  /// }
+  ///
+  /// \orig-impl{voicevox_synthesizer_render}
+  ///
+  /// ```c
+  /// __declspec(dllimport) VoicevoxResultCode voicevox_synthesizer_render(const struct VoicevoxSynthesizer *synthesizer, struct VoicevoxAudioFeatureSlice audio_feature_slice, uintptr_t *output_pcm_length, uint8_t **output_pcm)
+  /// ```
+  ({int result, Uint8List pcm}) render(
+    VoicevoxxAudioFeatureSlice audioFeatureSlice,
+  ) => voicevoxxSynthesizerRender(this, audioFeatureSlice);
+
+  ///
   /// AquesTalk風記法から音声合成を行う。
   ///
-  /// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
+  /// 生成したWAVデータを解放するには ::voicevox_bytes_free を使う。
   ///
   /// @param [in] synthesizer
   /// @param [in] kana AquesTalk風記法
@@ -478,7 +545,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// 日本語テキストから音声合成を行う。
   ///
-  /// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
+  /// 生成したWAVデータを解放するには ::voicevox_bytes_free を使う。
   ///
   /// ::voicevox_synthesizer_create_audio_query と ::voicevox_synthesizer_synthesis
   /// が一体になったショートハンド。詳細は[テキスト音声合成の流れ]を参照。
@@ -518,7 +585,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
   ///
-  /// 生成したJSONを解放するには ::voicevox_json_free を使う。
+  /// 生成したJSONを解放するには ::voicevox_string_free を使う。
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   /// @param [in] score_json [`Score`型]を表すJSON
@@ -572,7 +639,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
   ///
-  /// 生成したJSONを解放するには ::voicevox_json_free を使う。
+  /// 生成したJSONを解放するには ::voicevox_string_free を使う。
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   /// @param [in] score_json [`Score`型]を表すJSON
@@ -613,7 +680,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
   ///
-  /// 生成したJSONを解放するには ::voicevox_json_free を使う。
+  /// 生成したJSONを解放するには ::voicevox_string_free を使う。
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   /// @param [in] score_json [`Score`型]を表すJSON
@@ -654,7 +721,7 @@ extension VoicevoxSynthesizerPointerEx on Pointer<VoicevoxSynthesizer> {
   ///
   /// [歌唱音声合成]: https://github.com/VOICEVOX/voicevox_core/blob/main/docs/guide/user/song.md
   ///
-  /// 生成したWAVデータを解放するには ::voicevox_wav_free を使う。
+  /// 生成したWAVデータを解放するには ::voicevox_bytes_free を使う。
   ///
   /// @param [in] synthesizer 音声シンセサイザ
   /// @param [in] frame_audio_query_json [`FrameAudioQuery`型]を表すJSON

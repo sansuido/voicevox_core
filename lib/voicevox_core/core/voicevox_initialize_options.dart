@@ -5,17 +5,15 @@ class VoicevoxxInitializeOptions {
     this.accelerationMode = 0,
     this.cpuNumThreads = 0,
   });
-  int accelerationMode;
-  int cpuNumThreads;
+  final int accelerationMode;
+  final int cpuNumThreads;
 
-  void loadFromEntity(VoicevoxInitializeOptions entity) {
-    accelerationMode = entity.accelerationMode;
-    cpuNumThreads = entity.cpuNumThreads;
-  }
-
-  void loadFromPointer(Pointer<VoicevoxInitializeOptions> pointer) {
-    loadFromEntity(pointer.ref);
-  }
+  static VoicevoxxInitializeOptions fromEntity(
+    VoicevoxInitializeOptions entity,
+  ) => VoicevoxxInitializeOptions(
+    accelerationMode: entity.accelerationMode,
+    cpuNumThreads: entity.cpuNumThreads,
+  );
 
   Pointer<VoicevoxInitializeOptions> calloc() {
     final pointer = ffi.calloc<VoicevoxInitializeOptions>();

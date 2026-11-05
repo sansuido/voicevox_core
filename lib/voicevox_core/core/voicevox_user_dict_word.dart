@@ -8,11 +8,11 @@ class VoicevoxxUserDictWord {
     this.wordType = 1,
     this.priority = 5,
   });
-  String surface;
-  String pronunciation;
-  int accentType;
-  int wordType;
-  int priority;
+  final String surface;
+  final String pronunciation;
+  final int accentType;
+  final int wordType;
+  final int priority;
 
   Pointer<VoicevoxUserDictWord> calloc() {
     final pointer = ffi.calloc<VoicevoxUserDictWord>();
@@ -24,28 +24,25 @@ class VoicevoxxUserDictWord {
     return pointer;
   }
 
-  void loadFromEntity(VoicevoxUserDictWord entity) {
-    surface = entity.surface.toDartString();
-    pronunciation = entity.pronunciation.toDartString();
-    accentType = entity.accentType;
-    wordType = entity.wordType;
-    priority = entity.priority;
-  }
-
-  void loadFromPointer(Pointer<VoicevoxUserDictWord> pointer) {
-    loadFromEntity(pointer.ref);
-  }
+  static VoicevoxxUserDictWord fromEntity(VoicevoxUserDictWord entity) =>
+      VoicevoxxUserDictWord(
+        surface: entity.surface.toDartString(),
+        pronunciation: entity.pronunciation.toDartString(),
+        accentType: entity.accentType,
+        wordType: entity.wordType,
+        priority: entity.priority,
+      );
 }
 
 extension VoicevoxUserDictWordAllFreeExtension
     on Pointer<VoicevoxUserDictWord> {
   void callocAllFree() {
     if (ref.surface != nullptr) {
-      calloc.free(ref.surface);
+      ffi.calloc.free(ref.surface);
     }
     if (ref.pronunciation != nullptr) {
-      calloc.free(ref.pronunciation);
+      ffi.calloc.free(ref.pronunciation);
     }
-    calloc.free(this);
+    ffi.calloc.free(this);
   }
 }

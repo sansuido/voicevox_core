@@ -3,15 +3,13 @@ part of '../core.dart';
 class VoicevoxxSynthesisOptions {
   VoicevoxxSynthesisOptions({this.enableInterrogativeUpspeak = false});
 
-  bool enableInterrogativeUpspeak;
+  final bool enableInterrogativeUpspeak;
 
-  void loadFromEntity(VoicevoxSynthesisOptions entity) {
-    enableInterrogativeUpspeak = entity.enableInterrogativeUpspeak;
-  }
-
-  void loadFromPointer(Pointer<VoicevoxSynthesisOptions> pointer) {
-    loadFromEntity(pointer.ref);
-  }
+  static VoicevoxxSynthesisOptions fromEntity(
+    VoicevoxSynthesisOptions entity,
+  ) => VoicevoxxSynthesisOptions(
+    enableInterrogativeUpspeak: entity.enableInterrogativeUpspeak,
+  );
 
   Pointer<VoicevoxSynthesisOptions> calloc() {
     final pointer = ffi.calloc<VoicevoxSynthesisOptions>();

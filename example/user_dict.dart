@@ -48,9 +48,7 @@ int main() {
   }
   if (voicevoxResult == VOICEVOX_RESULT_OK) {
     final rec = userDict.addWord(
-      VoicevoxxUserDictWord()
-        ..surface = 'ヴォイスボックス'
-        ..pronunciation = 'ヴォヴォヴォボックス',
+      VoicevoxxUserDictWord(surface: 'ヴォイスボックス', pronunciation: 'ヴォヴォヴォボックス'),
     );
     voicevoxResult = rec.result;
     wordUuid = rec.wordUuid;
@@ -59,9 +57,7 @@ int main() {
     print(userDict.getJson());
     voicevoxResult = userDict.updateWord(
       wordUuid,
-      VoicevoxxUserDictWord()
-        ..surface = 'ヴォイスボックス'
-        ..pronunciation = 'ボックスボックス',
+      VoicevoxxUserDictWord(surface: 'ヴォイスボックス', pronunciation: 'ボックスボックス'),
     );
   }
   if (voicevoxResult == VOICEVOX_RESULT_OK) {

@@ -88,7 +88,7 @@ extension VoicevoxUserDictPointerEx on Pointer<VoicevoxUserDict> {
   ///
   /// ユーザー辞書の単語をJSON形式で出力する。
   ///
-  /// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+  /// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
   ///
   /// @param [in] user_dict ユーザー辞書
   /// @param [out] output_json 出力先

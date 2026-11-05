@@ -22,7 +22,7 @@ extension OpenJtalkRcPointerEx on Pointer<OpenJtalkRc> {
   ///
   /// 日本語のテキストを解析する。
   ///
-  /// 生成したJSON文字列を解放するには ::voicevox_json_free を使う。
+  /// 生成したJSON文字列を解放するには ::voicevox_string_free を使う。
   ///
   /// @param [in] open_jtalk Open JTalkのオブジェクト
   /// @param [in] text UTF-8の日本語テキスト

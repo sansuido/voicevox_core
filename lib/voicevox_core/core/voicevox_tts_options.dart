@@ -3,15 +3,12 @@ part of '../core.dart';
 class VoicevoxxTtsOptions {
   VoicevoxxTtsOptions({this.enableInterrogativeUpspeak = false});
 
-  bool enableInterrogativeUpspeak;
+  final bool enableInterrogativeUpspeak;
 
-  void loadFromEntity(VoicevoxTtsOptions entity) {
-    enableInterrogativeUpspeak = entity.enableInterrogativeUpspeak;
-  }
-
-  void loadFromPointer(Pointer<VoicevoxTtsOptions> pointer) {
-    loadFromEntity(pointer.ref);
-  }
+  static VoicevoxxTtsOptions fromEntity(VoicevoxTtsOptions entity) =>
+      VoicevoxxTtsOptions(
+        enableInterrogativeUpspeak: entity.enableInterrogativeUpspeak,
+      );
 
   Pointer<VoicevoxTtsOptions> calloc() {
     final pointer = ffi.calloc<VoicevoxTtsOptions>();

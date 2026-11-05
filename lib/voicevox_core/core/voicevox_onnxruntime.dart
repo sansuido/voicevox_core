@@ -31,7 +31,7 @@ extension VoicevoxOnnxruntimePointerEx on Pointer<VoicevoxOnnxruntime> {
   ///
   /// ONNX Runtimeとして利用可能なデバイスの情報を、JSONで取得する。
   ///
-  /// JSONの解放は ::voicevox_json_free で行う。
+  /// JSONの解放は ::voicevox_string_free で行う。
   ///
   /// あくまでONNX Runtimeが対応しているデバイスの情報であることに注意。GPUが使える環境ではなかったとしても`cuda`や`dml`は`true`を示しうる。
   ///

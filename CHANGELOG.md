@@ -1,3 +1,14 @@
+## 1.2.0
+
+- Supported `voicevox_core` v0.17.1.
+- Added functions (`voicevoxGetFrameRate`, `voicevoxAudioQueryFrameLength`, `voicevoxSynthesizerCreateAudioFeature`, 
+`voicevoxAudioFeatureLen`, `voicevoxAudioFeatureIsEmpty`, `voicevoxAudioFeatureSlice`,  `voicevoxAudioFeatureSliceNew`,
+`voicevoxAudioFeatureSliceLen`, `voicevoxAudioFeatureSliceIsEmpty`, `voicevoxAudioFeatureSliceSlice`, `voicevoxSynthesizerRender`).
+- Added glue functions.
+- Added example (`examples/slice.dart`).
+- Updated environment/dependencies:
+  - sdk: '>=3.13.7 <4.0.0'
+
 ## 1.1.0
 
 - Supported `voicevox_core` v0.17.0.
